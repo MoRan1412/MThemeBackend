@@ -36,6 +36,9 @@ const status = {
   };
 
 // API
+app.get("/", (req, res) => {
+    res.send("Welcome to Shoe Shop API!")
+})
 
 // User
 app.post("/user/add", async (req, res) => {
