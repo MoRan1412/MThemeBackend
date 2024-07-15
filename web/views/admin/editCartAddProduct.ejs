@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Admin</title>
+    <link rel="stylesheet" type="text/css" href="../../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../../js/myscript.js"></script>
+</head>
+
+<body>
+        <%- include('header'); %>
+
+    <form action="/admin/updateCartAddProductProcess/<%= cartId %>" method="post"  class="admin_page">
+        <div class="manage_list">
+            <table id="manage_productList">
+                <thead>
+                    <tr>
+                        <th colspan="2">Add Product to Cart</th>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td>
+                            <select id="productId" name="productId">
+                                <% for( let i = 0; i < products.length; i++ ) { %>
+                                    <option value="<%= products[i]._id %>">
+                                        <%= products[i].name %>  HKD$<%= products[i].price %>
+                                    </option>
+                                <% } %>
+                            </select>
+                        </td>
+                        
+                        <td>
+                            <input type="number" min="1" name="productQty" id="productQty" value="1">
+                        </td>
+                    </tr>
+            </table>
+        </div>
+        <div class="manage_function">
+            <a href="/admin/cart" class="manage_add">
+                <i class="material-icons">arrow_back</i>
+                <div class="manage_function_text">
+                    <h2>Back</h2>
+                    <p>Go Back</p>
+                </div>
+            </a>
+            <button type="submit" class="manage_add">
+                <i class="material-icons">save</i>
+                <div class="manage_function_text">
+                    <h2>Save</h2>
+                    <p>Save to Cart</p>
+                </div>
+            </button>
+        </div>
+    </form>
+
+    <%- include('../signOut.ejs') %>
+</body>
+
+</html>

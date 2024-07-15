@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Admin</title>
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../js/myscript.js"></script>
+</head>
+
+<body>
+        <%- include('header'); %>
+
+    <div class="admin_dashboard">
+        <a href="comment" class="commentNum">
+            <i class="material-icons">chat_bubble_outline</i>
+            <div class="admin_dashboard_text">
+                <h2>3,456K</h2>
+                <p>Total Comments</p>
+            </div>
+        </a>
+        <a href="transaction" class="profit">
+            <i class="material-icons">payments</i>
+            <div class="admin_dashboard_text">
+                <h2>$45,2K</h2>
+                <p>Total Profit</p>
+            </div>
+        </a>
+        <a href="product" class="productNum">
+            <i class="material-icons">inventory_2</i>
+            <div class="admin_dashboard_text">
+                <h2>2450</h2>
+                <p>Total Product</p>
+            </div>
+        </a>
+        <a href="user" class="userNum">
+            <i class="material-icons">person</i>
+            <div class="admin_dashboard_text">
+                <h2>3,456</h2>
+                <p>Total Users</p>
+            </div>
+        </a>
+        <div class="profitToday"></div>
+        <div class="statistic"></div>
+        <div class="adminList"></div>
+    </div>
+
+    <%- include('../signOut.ejs') %>
+</body>
+
+</html>

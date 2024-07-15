@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../js/myscript.js"></script>
+</head>
+
+<body>
+        <%- include('header'); %>
+
+    <div class="admin_page">
+        <div class="manage_list">
+            <table id="manage_userList">
+                <tr>
+                    <th>Userame</th>
+                    <th>Role</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+                <% for(let i=0; i < users.length; i++) { %>
+                <tr>
+        	    	<td><%= users[i].name %></td>
+                    <td><%= users[i].role.toUpperCase() %></td>
+        	    	<td><i class="material-icons" onclick="location.href=`/admin/updateUser/<%= users[i]['_id'] %>`;">edit</i></td>
+        	    	<td><i class="material-icons" onclick="location.href=`/deleteUserProcess/<%= users[i]['_id'] %>`;">delete</i></td>
+				</tr>
+                <% } %>
+            </table>
+        </div>
+        <div class="manage_function">
+            <a href="/admin/addUser" class="manage_add">
+                <i class="material-icons">add</i>
+                <div class="manage_function_text">
+                    <h2>Add</h2>
+                    <p>Create User</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <%- include('../signOut.ejs') %>
+</body>
+
+</html>

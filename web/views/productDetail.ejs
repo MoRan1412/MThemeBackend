@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Product</title>
+    <script src="./js/myscript.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+</head>
+
+<body>
+    <header class="header">
+        <%- include('header'); %>
+    </header>
+
+    <div class="page">
+        <div class="product-detail-container">
+            <div class="product-detail-img-container">
+                <img src="<%= product.image[0] %>" class="product-detail-img" alt="">
+                <img src="<%= product.image[1] %>" class="product-detail-img" alt="">
+            </div>
+            <div class="product-detail-data-container">
+                <div class="product-detail-data">
+                    <h1>
+                        <%= product.name %>
+                    </h1>
+                    <p>
+                        <%= product.description %>
+                    </p>
+                    <h2>HK$<%= product.price %>
+                    </h2>
+                </div>
+                <form action="/addCartProcess/<%= product._id %>" method="post" class="add-cart-form">
+                    <div>
+                        <p><label for="productQty">Quantity</label></p>
+                        <input type="number" id="productQty" value="1" name="productQty" min="1" required="required">
+                    </div>
+                    <input type="submit" value="ADD TO CART">
+                </form>
+            </div>
+
+        </div>
+        <div class="product-detail-feature">
+            <div class="product-detail-feature-list">
+                <h2>COMMENT</h2>
+            </div>
+
+            <form action="/commentProcess/<%= product['_id'] %>" method="post">
+                <input type="text" name="commentContent" id="commentContent" required="required">
+                <button type="submit">
+                    <i class="material-icons">send</i>
+                </button>
+            </form>
+
+            <% for( let index=0; index < product.comments.length; index++ ) { %>
+                <div class="comment-container">
+                    <img class="comment-headshot" src="<%= product.comments[index].user.avatar %>"/>
+                    <div class="comment-data">
+                        <div class="comment-header">
+                            <div class="comment-user-data">
+                                <h2>
+                                    <%= product.comments[index].name %>
+                                </h2>
+                                <span>
+                                    <%= product.comments[index].date %>
+                                        <%= product.comments[index].time %>
+                                </span>
+                            </div>
+                            <% product.comments[index].userId %>
+                            <% if (typeof product.comments[index].userId !== 'undefined' && userId == product.comments[index].userId ) { %>
+                                <div class="comment-feature">
+                                    <i class="material-icons" onclick="location.href='/commentUpdate/<%= product.comments[index]._id %>'">edit</i>
+                                    <i class="material-icons" onclick="location.href='/deleteCommentProcess/<%= product.comments[index]._id %>'">delete</i>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="comment-content">
+                            <p>
+                                <%= product.comments[index].content %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+
+
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../js/myscript.js"></script>
+</head>
+
+<body>
+        <%- include('header'); %>
+
+    <div class="admin_page">
+        <div class="manage_list">
+            <table id="manage_commentList">
+                <tr>
+                    <th>USERNAME</th>
+                    <th>TOTAL PRODUCT</th>
+                    <th>TOTAL PRICE</th>
+                    <th>EDIT</th>
+                </tr>
+                <% for(let i=0; i < carts.length; i++) { %>
+                <tr>
+                    <td><%= carts[i].userName %></td>
+                    <td><%= carts[i].totalProducts %></td>
+                    <td><%= carts[i].totalPrice %></td>
+                    <td><i class="material-icons" onclick="location.href=`/admin/updateCart/<%= carts[i]['_id'] %>`;">edit</i>
+                    </td>
+				</tr>
+                <% } %>
+            </table>
+        </div>
+    </div>
+
+    <%- include('../signOut.ejs') %>
+</body>
+
+</html>

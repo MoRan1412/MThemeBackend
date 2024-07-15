@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../js/myscript.js"></script>
+</head>
+
+<body>
+    <%- include('header'); %>
+        <form action="/addCommentProcess" method="post" class="admin_page">
+            <div class="manage_list">
+                <div class="add_form">
+                    <div class="add_input">
+                        <h1>Create Comment</h1>
+                        <div class="add-select-container">
+                            <label for="name">Username</label>
+                            <select id="userId" name="userId">
+                                <% for( let i=0; i < data.user.length; i++ ) { %>
+                                    <option value="<%= data.user[i]._id %>">
+                                        <%= data.user[i].name %>
+                                    </option>
+                                    <% } %>
+                            </select>
+                        </div>
+
+                        <div class="add-select-container">
+                            <label for="productId">Product</label>
+                            <select id="productId" name="productId">
+                                <% for( let i=0; i < data.product.length; i++ ) { %>
+                                    <option value="<%= data.product[i]._id %>">
+                                        <%= data.product[i].name %>
+                                    </option>
+                                    <% } %>
+                            </select>
+                        </div>
+                        
+                        <input type="text" id="content" name="content" placeholder="Content">
+
+                    </div>
+                </div>
+            </div>
+            <div class="manage_function">
+                <a href="#" onclick="goBack()" class="manage_add">
+                    <i class="material-icons">arrow_back</i>
+                    <div class="manage_function_text">
+                        <h2>Back</h2>
+                        <p>Go Back</p>
+                    </div>
+                </a>
+                <button type="submit" class="manage_add">
+                    <i class="material-icons">save</i>
+                    <div class="manage_function_text">
+                        <h2>Save</h2>
+                        <p>Save Comment</p>
+                    </div>
+                </button>
+            </div>
+        </form>
+
+        <%- include('../signOut.ejs') %>
+</body>
+
+</html>

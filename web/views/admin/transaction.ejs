@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../js/myscript.js"></script>
+</head>
+
+<body>
+    <%- include('header'); %>
+
+        <div class="admin_page">
+            <div class="manage_list">
+                <table id="manage_transactionList">
+                    <tr>
+                        <th>TIMESTAMP</th>
+                        <th>PRODUCT</th>
+                        <th>PRICE</th>
+                        <th>STATUS</th>
+                        <th>EDIT</th>
+                        <th>DELETE</th>
+                    </tr>
+                    <% for(let i=0; i < transactions.length; i++) { %>
+                        <tr>
+                            <td>
+                                <%= transactions[i].timestamp %>
+                            </td>
+                            <td>
+                                <%= transactions[i].totalProducts %>
+                            </td>
+                            <td>
+                                <%= transactions[i].totalPrice %>
+                            </td>
+                            <td>
+                                <div class="transaction-check">
+                                    <% if (transactions[i].status=='pending' ) { %>
+                                        <i class="material-icons" style="color: grey;">
+                                            pending
+                                        </i>
+                                        <% } else if (transactions[i].status=='completed' ) { %>
+                                            <i class="material-icons">
+                                                check_circle_outline
+                                            </i>
+                                            <% } %>
+                                                <%= transactions[i].status.toUpperCase() %>
+                                </div>
+                            </td>
+                            <td><i class="material-icons"
+                                    onclick="location.href=`/admin/updateTransaction/<%= transactions[i]['_id'] %>`;">edit</i>
+                            </td>
+                            <td><i class="material-icons"
+                                    onclick="location.href=`/deleteTransactionProcess/<%= transactions[i]['_id'] %>`;">delete</i>
+                            </td>
+                        </tr>
+                        <% } %>
+                </table>
+            </div>
+            <div class="manage_function">
+                <a href="/admin/addTransaction" class="manage_add">
+                    <i class="material-icons">add</i>
+                    <div class="manage_function_text">
+                        <h2>Add</h2>
+                        <p>Create Transaction</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <%- include('../signOut.ejs') %>
+</body>
+
+</html>

@@ -1,0 +1,29 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "web/app.js",
+            "use": "@vercel/node",
+            "config": {
+                "zeroConfig": true
+            }
+        },
+        {
+            "src": "api/app.js",
+            "use": "@vercel/node",
+            "config": {
+                "zeroConfig": true
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/api/serverless"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/web/serverless"
+        }
+    ]
+}

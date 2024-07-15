@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Product</title>
+    <script src="./js/myscript.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+</head>
+
+<body>
+    <header class="header">
+        <%- include('header'); %>
+    </header>
+
+    <div class="product_page">
+        <!-- <div class="product-filter"></div> -->
+        <% if (typeof keyword !== 'undefined') { %>
+           <h2 style="color: white; margin-bottom: 5vh; width: 94%;">Search Result: <%= keyword %></h2>
+        <% } %>
+        <div class="product-list" id="product-list">
+            <% for(let i=0; i < products.length; i++) { %>
+                <div class="product-container" onclick="location.href=`/productDetail/<%= products[i]['_id'] %>` ">
+                    <div class="product-cover" style="background-image: url('<%= products[i].image[0] %>');">
+                        <!-- <div class="add-product-cart" onclick="location.href=`/addCartProcess/<%= products[i]['_id'] %>` ">
+                            <i class="material-icons">add_shopping_cart</i>
+                        </div> -->
+                    </div>
+                    <h1 class="product-name">
+                        <%= products[i].name %>
+                    </h1>
+                    <p class="product-price">$<%= products[i].price %>
+                    </p>
+                </div>
+                <% } %>
+        </div>
+    </div>
+</body>
+
+</html>

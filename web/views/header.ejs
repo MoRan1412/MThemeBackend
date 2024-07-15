@@ -1,0 +1,53 @@
+<div class="header-logo" onclick="location.href='/'">
+</div>
+<div class="header-menu">
+    <a href="/" <% if (typeof page !== 'undefined' && page === 'index') { %>
+        class="active"
+        <% } else { %>
+            <%  %>
+         <% } %> >Home</a>
+    <a href="/hotProduct" <% if (typeof page !== 'undefined' && page === 'hotproduct') { %>
+        class="active"
+        <% } else { %>
+            <%  %>
+         <% } %> >Hot</a>
+    <a href="/product" <% if (typeof page !== 'undefined' && page === 'product') { %>
+     class="active"
+     <% } else { %>
+        <%  %>
+     <% } %> >Product</a>
+    <a href="/about" <% if (typeof page !== 'undefined' && page === 'about') { %>
+        class="active"
+        <% } else { %>
+           <%  %>
+        <% } %>>About</a>
+</div>
+
+<div class="header-feature">
+    <div class="header-feature-search">
+        <form action="/productSearch" method="post">
+            <input type="text" id="productName" name="productName" placeholder="Search">
+            <button type="submit"><i class="material-icons">search</i></button>
+        </form>
+    </div>
+    <div class="header-feature-button">
+        <i class="material-icons" onclick="location.href='/cart';">shopping_cart</i>
+    </div>
+    <div class="header-feature-button" onmouseover="sign_out()" onmouseout="sign_out_move()">
+        <i class="material-icons" onclick="location.href='/login';">account_circle</i>
+    </div>
+</div>
+
+<div class="menu-btn">
+    <i class="material-icons" onclick="menu(this)" style="cursor: pointer;">menu</i>
+</div>
+<div class="menu" id="menu">
+    <div class="menu-list">
+        <a href="/">Home</a>
+        <a href="/hotProduct">Hot</a>
+        <a href="/product">Product</a>
+        <a href="/about">About</a>
+        <a href="/cart">Cart</a>
+        <a href="/login">Account</a>
+    </div>
+</div>

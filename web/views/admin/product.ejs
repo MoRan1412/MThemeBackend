@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Admin Product</title>
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../js/myscript.js"></script>
+</head>
+
+<body>
+        <%- include('header'); %>
+
+    <div class="admin_page">
+        <div class="manage_list">
+            <table id="manage_productList">
+                <tr>
+                    <th>Cover</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Type</th>
+                    <th>Publish Date</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                    <th>View</th>
+                </tr>
+                <% for(let i=0; i < products.length; i++) { %>
+                    <tr>
+                        <td>
+                            <div
+                                style="background-image: url('<%= products[i].image[0] %>'); border-radius: 10px; width: 70px; height: 70px; background-position: center; background-repeat: no-repeat; background-size: contain; background-color: white;">
+                            </div>
+                        </td>
+                        <td><%= products[i].name %></td>
+                        <td>$<%= products[i].price %></td>
+                        <td><%= products[i].product_type.toUpperCase() %></td>
+                        <td><%= products[i].publish_date %></td>
+                        <td><i class="material-icons" onclick="location.href=`/admin/updateProduct/<%= products[i]['_id'] %>`;">edit</i>
+                        </td>
+                        <td><i class="material-icons" onclick="location.href=`/deleteProductProcess/<%= products[i]['_id'] %>`;">delete</i></td>
+                        <td><i class="material-icons" onclick="location.href=`/productDetail/<%= products[i]['_id'] %>`;">open_in_new</i></td>
+                    </tr>
+                    <% } %>
+            </table>
+        </div>
+        <div class="manage_function">
+            <a href="/admin/addProduct" class="manage_add">
+                <i class="material-icons">add</i>
+                <div class="manage_function_text">
+                    <h2>Add</h2>
+                    <p>Create Product</p>
+                </div>
+            </a>
+        </div>
+    </div>
+    <%- include('../signOut.ejs') %>
+</body>
+
+</html>

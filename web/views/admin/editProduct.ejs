@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Admin</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../../js/myscript.js"></script>
+</head>
+
+<body>
+        <%- include('header'); %>
+
+    <form action="/updateProductProcess/<%= product._id %>" method="post" class="admin_page">
+        <div class="manage_list">
+            <div class="add_form">
+                <div class="add_input">
+                    <h1>Edit Product</h1>
+                    <input type="text" id="product_name" name="product_name" value="<%= product.name %>" placeholder="Product Name">
+                    <input type="text" id="product_desc" name="product_desc" value="<%= product.description %>" placeholder="Product Description">
+                    <input type="number" id="product_price" min="0" name="product_price" value="<%= product.price %>" placeholder="Product Price">
+                    <div class="add_input_radio">
+                        <p>Type of Product</p>
+                        <label>
+                            <input type="radio" checked="checked" id="new" name="product_type" value="new" <% if ( product.product_type == 'new' ) { %>
+                             checked
+                            <% } %>>
+                            <span>New Product</span>
+                        </label>
+                        <label>
+                            <input type="radio" id="hot" name="product_type" value="hot"  <% if ( product.product_type == 'hot' ) { %>
+                                checked
+                               <% } %>>
+                            <span>Hot Product</span>
+                        </label>
+                        <label>
+                            <input type="radio" id="none" name="product_type" value="none" <% if ( product.product_type == 'none' ) { %>
+                                checked
+                               <% } %>>
+                            <span>None</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="manage_function">
+            <a href="#" onclick="goBack()" class="manage_add">
+                <i class="material-icons">arrow_back</i>
+                <div class="manage_function_text">
+                    <h2>Back</h2>
+                    <p>Go Back</p>
+                </div>
+            </a>
+            <button type="submit" class="manage_add">
+                <i class="material-icons">save</i>
+                <div class="manage_function_text">
+                    <h2>Save</h2>
+                    <p>Save Product</p>
+                </div>
+            </button>
+        </div>
+    </form>
+
+    <%- include('../signOut.ejs') %>
+</body>
+
+</html>

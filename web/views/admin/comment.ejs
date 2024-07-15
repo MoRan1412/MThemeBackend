@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../js/myscript.js"></script>
+</head>
+
+<body>
+        <%- include('header'); %>
+
+    <div class="admin_page">
+        <div class="manage_list">
+            <table id="manage_commentList">
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Product Name</th>
+                    <th>Username</th>
+                    <th>Content</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+                <% for(let i=0; i < comments.length; i++) { %>
+                <tr>
+        	    	<td><%= comments[i].date %></td>
+        	    	<td><%= comments[i].time %></td>
+                    <td><%= comments[i].productName %></td>
+                    <td><%= comments[i].name %></td>
+                    <td><%= comments[i].content %></td>
+                    <td><i class="material-icons" onclick="location.href=`/admin/updateComment/<%= comments[i]['_id'] %>`;">edit</i>
+                    </td>
+        	    	<td><i class="material-icons" onclick="location.href=`/deleteCommentProcess/<%= comments[i]['_id'] %>`;">delete</i></td>
+				</tr>
+                <% } %>
+            </table>
+        </div>
+        <div class="manage_function">
+            <a href="/admin/addComment" class="manage_add">
+                <i class="material-icons">add</i>
+                <div class="manage_function_text">
+                    <h2>Add</h2>
+                    <p>Create Comment</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <%- include('../signOut.ejs') %>
+</body>
+
+</html>

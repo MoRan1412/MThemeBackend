@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= updateTitle %>
+    </title>
+    <link rel="stylesheet" type="text/css" href="<% if (typeof cssLoad !== 'undefined') { %>
+        <%= cssLoad %>
+    <% } else { %>
+        ../css/style.css
+    <% } %>">
+</head>
+
+<body>
+    <div id="notice_window" class="notice-window">
+        <table class="notice-container">
+            <thead>
+                <tr>
+                    <th>
+                        <%= updateTitle %>
+                    </th>
+                </tr>
+            </thead>
+            <form action="<%= updateBtn %>" method="post">
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="number" min="1" value="<%= updateNum %>" name="num" id="num">
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><button type="submit">OK</button></td>
+                    </tr>
+                </tfoot>
+            </form>
+        </table>
+    </div>
+</body>
+
+</html>

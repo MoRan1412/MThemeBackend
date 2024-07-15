@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Login</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="./js/myscript.js"></script>
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+</head>
+
+<body>
+    <header class="header">
+        <%- include('header'); %>
+    </header>
+
+    <div class="login_page">
+        <form action="/loginProcess" id="login_form" method="post">
+            <img src="../source/image/logo.svg" alt="">
+            <input type="text" id="username" name="username" placeholder="Username" required="required">
+            <input type="password" id="password" name="password" placeholder="Password" required="required">
+            <% if (typeof err !== 'undefined') { %>
+                <span id="password_error" style="color: red; font-size: 15px;"><%= err %></span>
+            <% } %>
+            <button type="submit">Login</button>
+            <p>Don't have an account? <a href="/register">Sign up</a></p>
+        </form>
+    </div>
+</body>
+
+</html>

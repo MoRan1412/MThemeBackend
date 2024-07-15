@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./js/myscript.js"></script>
+    <title>Nike - Hot Product</title>
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+</head>
+
+<body>
+    <header class="header">
+        <%- include('header'); %>
+    </header>
+
+    <div class="product_page">
+        <!-- <div class="product-filter"></div> -->
+        <div class="product-list" id="product-list">
+            <% for(let i=0; i < hotproducts.length; i++) { %>
+                <div class="product-container" onclick="location.href=`/productDetail/<%= hotproducts[i]['_id'] %>` ">
+                    <div class="product-cover" style="background-image: url('<%= hotproducts[i].image[0] %>');">
+                        <!-- <div class="add-product-cart" onclick="location.href=`/addCartProcess/<%= hotproducts[i]['_id'] %>` ">
+                            <i class="material-icons">add_shopping_cart</i>
+                        </div> -->
+                    </div>
+                    <h1 class="product-name">
+                        <%= hotproducts[i].name %>
+                    </h1>
+                    <p class="product-price">$<%= hotproducts[i].price %>
+                    </p>
+                </div>
+                <% } %>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Cart</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../js/myscript.js"></script>
+</head>
+
+<body>
+    <header class="header">
+        <%- include('../header'); %>
+    </header>
+
+    <div class="page">
+        <div class="cart-container">
+            <div class="cart-list" id="cart-list">
+                <% for(let i=0; i<products.length; i++) { %>
+                <div class="item">
+                    <img src="<%= products[i].image %>" alt="">
+                       <div class="item-data">
+                           <h2 onclick="location.href=`/productDetail/<%= products[i]['productID'] %>` " style="cursor: pointer;"><%= products[i].name %></h2>
+                           <div>
+                               <p>Qty: <%= products[i].quantity %></p>
+                           </div>
+                           <div class="cart-edit">
+                                <div class="cart-edit-btn" onclick="location.href=`/updateCartNum/<%= products[i]['productID'] %>`">Edit</div>
+                                <div class="cart-edit-btn" onclick="location.href=`/deleteCartProcess/<%= products[i]['productID'] %>`">Remove</div>
+                           </div>
+                       </div>
+                    <p class="cart-price">HK$<%= products[i].price %></p>
+                 </div>
+                <% } %>
+            </div>
+            <div class="ready-transaction">
+                <h2>SUMMARY</h2>
+                <hr>
+                <table class="statistics">
+                    <tr>
+                        <th>DELIVERY CHARGE</th>
+                        <td>FREE</td>
+                    </tr>
+                    <tr>
+                        <th>TOTAL</th>
+                        <td>HK$<%= totalAmount %></td>
+                    </tr>
+                </table>
+                <a href="/addTransactionProcess">CHECKOUT</a>
+            </div>
+        </div>
+    </div>
+    <%- include('../signOut.ejs') %>
+</body>
+
+</html>

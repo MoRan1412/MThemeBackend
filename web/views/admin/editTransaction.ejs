@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - Admin</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../../js/myscript.js"></script>
+</head>
+
+<body>
+    <%- include('header'); %>
+        <form action="/updateTransactionProcess/<%= transaction._id %>" method="post" class="admin_page">
+            <div class="manage_list">
+                <div class="add_form">
+                    <div class="add_input">
+                        <h1>Edit Transaction</h1>
+                        <div class="add-select-container">
+                            <label for="status">Status</label>
+                            <select id="status" name="status">
+                                <option value="pending" <% if (transaction.status == 'pending') { %>
+                                 selected
+                                <% } %>>
+                                Pending
+                                </option>
+                                <option value="completed" <% if (transaction.status == 'completed') { %>
+                                    selected
+                                   <% } %>>
+                                    Completed
+                                </option>
+                        </select>
+                        </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="manage_function">
+                <a href="#" onclick="goBack()" class="manage_add">
+                    <i class="material-icons">arrow_back</i>
+                    <div class="manage_function_text">
+                        <h2>Back</h2>
+                        <p>Go Back</p>
+                    </div>
+                </a>
+                <button type="submit" class="manage_add">
+                    <i class="material-icons">save</i>
+                    <div class="manage_function_text">
+                        <h2>Save</h2>
+                        <p>Save Transaction</p>
+                    </div>
+                </button>
+            </div>
+        </form>
+
+        <%- include('../signOut.ejs') %>
+</body>
+
+</html>

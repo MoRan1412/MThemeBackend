@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike</title>
+    <link rel="stylesheet" type="text/css" href="./css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="./js/myscript.js"></script>
+</head>
+
+<body>
+
+    <div class="home" id="home">
+        <!-- Heading -->
+        <header class="header" style="box-shadow: none;">
+            <%- include('header'); %>
+        </header>
+
+        <!-- New Item -->
+        <main class="main">
+            <div class="new_item_image" style="background-image: url('<%= new_item_image1 %>');"></div>
+            <div class="new_item_image2" style="background-image: url('<%= new_item_image2 %>');"></div>
+            <div class="new_item_data">
+                <h2 id="new_item_desc">
+                    <%= new_item_desc %>
+                </h2>
+                <div class="view_new_item"><a href="/productDetail/<%= new_item_id %>" id="view_new_item">VIEW</a></div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

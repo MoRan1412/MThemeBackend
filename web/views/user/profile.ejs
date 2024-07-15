@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nike - User</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link href=https://fonts.googleapis.com/icon?family=Material+Icons rel="stylesheet">
+    <script src="../js/myscript.js"></script>
+</head>
+
+<body>
+    <header class="header">
+        <%- include('../header'); %>
+    </header>
+
+    <div class="page">
+        <div class="profile-container">
+            <div class="profile-list">
+                <div class="profile-img-bg">
+                    <img class="profile-img" src="<%= profile.avatar %>"></img>
+                </div>
+                <div class="profile-btn" onclick="location.href='/user/profile';">
+                    <i class="material-icons">person</i>
+                    <p>MY ACCOUNT</p>
+                </div>
+                <div class="profile-btn" onclick="location.href='/user/transaction';">
+                    <i class="material-icons">receipt_long</i>
+                    <p>TRANSACTION</p>
+                </div>
+            </div>
+            <div class="profile-feature">
+
+                <% if (page=="account") { %>
+                    <table class="profile-account">
+                        <thead>
+                            <tr>
+                                <th colspan="2">
+                                    <h2>MY ACCOUNT</h2>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <p>AVATAR</p>
+                                </td>
+                                <td>
+                                    <img src="<%= profile.avatar %>" alt="">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p>USERNAME</p>
+                                </td>
+                                <td>
+                                    <p><%= profile.name %></p>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2">
+                                    <div class="profile-account-btn">
+                                    <a href="/user/updatePassword">CHANGE PASSWORD</a>
+                                    <a href="/user/updateProfile">Edit</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                <% } else if (page=="accountEdit") { %>
+                    <form action="/updateProfile" method="post" enctype="multipart/form-data" id="accountEditForm">
+                    <table class="profile-account">
+                        <thead>
+                            <tr>
+                                <th colspan="2">
+                                    <h2>MY ACCOUNT</h2>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <p>AVATAR</p>
+                                </td>
+                                <td>
+                                    <div class="imageContainer" style="width: 80px; height: 80px; border-radius: 100px;">
+                                        <label for="imageInput4" id="imageInputCustom4" class="imageInputCustom" style="width: 80px; height: 80px; border-radius: 100px;">
+                                            <p id="image-upload-text4" class="image-upload-text"><i class="material-icons">add</i></p>
+                                            <img id="showImage4" style="width: 80px; height: 80px;" class="showImage"/>
+                                        </label>
+                                        <input type="file" id="imageInput4" class="image-input" name="avatar" accept="image/*"
+                                            onchange="handleImageSelect(event, 'showImage4', 'image-upload-text4')">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p>USERNAME</p>
+                                </td>
+                                <td>
+                                    <input type="text" value="<%= profile.name %>" name="username" id="username">
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2">
+                                    <div class="profile-account-btn">
+                                    <a onclick="goBack()" style="cursor: pointer;">Back</a>
+                                    <a onclick="document.getElementById('accountEditForm').submit()" style="cursor: pointer;">Save</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </form>
+                <% } else if (page=="transaction") { %>
+                    <div class="profile-transaction">
+                        <h2>TRANSACTION</h2>
+                        <table>
+                            <tr>
+                                <th>DATE</th>
+                                <th>PRODUCT</th>
+                                <th>STATUS</th>
+                                <th>TOTAL</th>
+                                <th>CHECKOUT</th>
+                                <th>DELETE</th>
+                            </tr>
+                            <% for( let i=0; i < transactions.length; i++ ) { %>
+                                <tr>
+                                    <td>
+                                        <%= transactions[i].timestamp %>
+                                    </td>
+                                    <td>
+                                        <%= transactions[i].totalProducts %>
+                                    </td>
+                                    <td>
+                                        <%= transactions[i].status.toUpperCase() %>
+                                    </td>
+                                    <td>
+                                        <%= transactions[i].totalPrice %>
+                                    </td>
+                                    <td>
+                                        
+                                <% if (transactions[i].status === 'pending') { %>
+                                    <i class="material-icons"
+                                    onclick="location.href=`/transactionDetail/<%= transactions[i]['_id'] %>`;">shopping_cart_checkout</i>
+                                <% } else { %>
+                                    <i class="material-icons" style="opacity: 0.5;">block</i>
+                                <% } %>
+                                    </td>
+                                    <td>
+                                        <i class="material-icons"
+                                onclick="location.href=`/deleteTransactionProcess/<%= transactions[i]['_id'] %>`;">delete</i>
+                                    </td>
+                                </tr>
+                                <% } %>
+                        </table>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../signOut.ejs') %>
+</body>
+
+</html>
