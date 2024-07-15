@@ -6,7 +6,6 @@ const { MongoClient, ServerApiVersion  } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId
 const rand = require('csprng');
 const app = express();
-const port = 10888  // Replit doesn’t matter which port is using
  
 app.use(bodyParser.json()); //Used to parse JSON bodies
 app.use(bodyParser.urlencoded({ extended: true })); //Parse URL-encoded bodies
@@ -36,6 +35,10 @@ const status = {
   };
 
 // API
+
+app.get("/", (req, res) => {
+    res.send("Hello, World!");
+})
 
 // User
 app.post("/user/add", async (req, res) => {
@@ -1125,9 +1128,11 @@ app.delete("/comment/delete/:commentId", async (req, res) => {
 
 
 
-app.listen(port, () => {
-    console.log(`Connected on port ${port}`)
-}); 
+// const port = 10888
+// app.listen(port, () => {
+//     console.log(`Connected on port ${port}`)
+// }); 
+export default app;
 
 
 
