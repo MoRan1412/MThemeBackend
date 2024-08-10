@@ -3,7 +3,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const rand = require('csprng');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const app = express();
 const port = 10888  // Replit doesn’t matter which port is using
 
