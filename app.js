@@ -4,6 +4,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const rand = require('csprng');
 const mysql = require('mysql2');
+// const fs = require('fs');
+// const path = require('path');
 const app = express();
 const port = 10888  // Replit doesn’t matter which port is using
 
@@ -23,16 +25,13 @@ const status = {
 const db = mysql.createConnection({
     host: 'ec2-43-199-88-244.ap-east-1.compute.amazonaws.com',
     port: '3306',
-    user: 'root',
+    user: 'me',
     password: 'W836rrv+',
     database: 'mtheme',
 });
 
-db.connect(function (err) {
+db.connect()
 
-    if (!err) {
-        console.log("Database is connected ... ");
-    } else {
-        console.log("Error connecting database ... ");
-    }
-});
+app.listen(port, () => {
+    console.log(`Connected on port ${port}`)
+}); 
