@@ -24,7 +24,7 @@ const status = {
 const pool = mysql.createPool({
     host: 'ec2-43-199-88-244.ap-east-1.compute.amazonaws.com',
     port: '3306',
-    user: 'me',
+    user: 'root',
     password: 'W836rrv+',
     database: 'mtheme',
 });
@@ -41,6 +41,7 @@ app.get('/user/get', async (req, res) => {
         res.json(result);
     } catch (err) {
         res.status(status.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error' });
+        console.log(err)
     }
 })
 
