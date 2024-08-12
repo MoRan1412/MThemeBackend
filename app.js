@@ -22,7 +22,7 @@ const status = {
 };
 
 const pool = mysql.createPool({
-    host: 'ec2-43-199-88-244.ap-east-1.compute.amazonaws.com',
+    host: 'ec2-43-199-88-244.ap-east-1.compute.amazonaws.com', //DNS IPv4
     port: '3306',
     user: 'root',
     password: 'W836rrv+',
@@ -33,6 +33,7 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
+// User
 app.get('/user/get', async (req, res) => {
     try {
         const conn = await pool.getConnection();
@@ -44,6 +45,8 @@ app.get('/user/get', async (req, res) => {
         console.log(err)
     }
 })
+
+// API Management
 
 
 const port = 10888  // Replit doesn’t matter which port is using
