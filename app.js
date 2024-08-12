@@ -26,27 +26,69 @@ const pool = mysql.createPool({
     port: '3306',
     user: 'root',
     password: 'W836rrv+',
-    database: 'mtheme',
+    database: 'tgc',
 });
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-// User
-app.get('/user/get', async (req, res) => {
+// API Management
+app.get('/api/get', async (req, res) => {
     try {
         const conn = await pool.getConnection();
-        const [result, field] = await conn.query('SELECT * FROM `user`');
+        const [result, field] = await conn.query('SELECT * FROM `apiData`');
         conn.release();
         res.json(result);
+        console.log('[OK] APIs retrieved successfully');
     } catch (err) {
         res.status(status.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error' });
+        console.log(`[ERR] Fail to get api`)
         console.log(err)
     }
 })
 
-// API Management
+app.post('/api/add', async (req, res) => {
+    try {
+        const conn = await pool.getConnection();
+        const [result, field] = await conn.execute('INSERT INTO `apiData` (`apiName`, `apiUrl`, `apiMethod`, `apiParams`, `apiType`) VALUES (?, ?, ?, ?, ?)', [req.body.apiName, req.body.apiUrl, req.body.apiMethod, req.body.apiParams, req.body.apiType]);
+        conn.release();
+        res.status(status.CREATED).json({ message: 'API added successfully' });
+        console.log('[OK] API added successfully');
+    } catch (err) {
+        res.status(status.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error' });
+        console.log(`[ERR] Fail to add api`)
+        console.log(err)
+    }
+})
+
+app.put('/api/update/:id', async (req, res) => {
+    try {
+        const conn = await pool.getConnection();
+        const [result, field] = await conn.execute('UPDATE `apiData` SET `apiName` = ?, `apiUrl` = ?, `apiMethod` = ?, `apiParams` = ?, `apiType` = ? WHERE `id` = ?', [req.body.apiName, req.body.apiUrl, req.body.apiMethod, req.body.apiParams, req.body.apiType, req.params.id]);
+        conn.release();
+        res.json({ message: 'API updated successfully' });
+        console.log('[OK] API updated successfully');
+    } catch (err) {
+        res.status(status.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error' });
+        console.log(`[ERR] Fail to update api`)
+        console.log(err)
+    }
+})
+
+app.delete('/api/delete/:id', async (req, res) => {
+    try {
+        const conn = await pool.getConnection();
+        const [result, field] = await conn.execute('DELETE FROM `apiData` WHERE `id` = ?', [req.params.id]);
+        conn.release();
+        res.json({ message: 'API deleted successfully' });
+        console.log('[OK] API deleted successfully');
+    } catch (err) {
+        res.status(status.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error' });
+        console.log(`[ERR] Fail to delete api`)
+        console.log(err)
+    }
+})
 
 
 const port = 10888  // Replit doesn’t matter which port is using
