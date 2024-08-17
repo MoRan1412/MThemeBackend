@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@octokit/rest": "^21.0.2",
     "body-parser": "^1.20.2",
     "csprng": "^0.1.2",
     "express": "^4.19.2",
@@ -14,7 +15,7 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.mjs"
   },
   "author": "MTheme",
   "license": "ISC",
