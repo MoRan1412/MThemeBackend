@@ -1,13 +1,8 @@
 import express from "express";
 import bodyParser from "body-parser";
 import csprng from "csprng";
-import { Octokit } from "@octokit/core";
-
-const octokit = new Octokit({
-    auth: process.env.MThemeBackendEnv
-});
-const owner = 'MoRan1412';
-const repo = 'MThemeDatabase';
+import crypto from "crypto";
+import fs from "fs";
 
 const app = express();
 
@@ -15,6 +10,25 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const tokenUsers = []
+
+import nodemailer from "nodemailer";
+const GMAIL_USER = "mtheme1231@gmail.com";
+const GMAIL_PASS = "ojzo rtkd shoa zbqb";
+const mailTransport = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: GMAIL_USER,
+        pass: GMAIL_PASS
+    }
+})
+
+import { Octokit } from "@octokit/core";
+const octokit = new Octokit({
+    auth: process.env.MThemeBackendEnv
+});
+
+const owner = 'MoRan1412';
+const repo = 'MThemeDatabase';
 
 const status = {
     OK: 200,
@@ -186,6 +200,33 @@ app.delete('/user/delete/:id', async (req, res) => {
         console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
     }
 });
+
+app.post('/user/sendEmail', async (req, res) => {
+    const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const charactersLength = characters.length;
+    let code = '';
+    for (let i = 0; i < 5; i++) {
+        const randomBytes = crypto.randomBytes(1);
+        code += characters[randomBytes[0] % charactersLength];
+    }
+
+    let htmlContent = fs.readFileSync('emailContent.html', 'utf8');
+    htmlContent = htmlContent.replace('{{code}}', code);
+
+    try {
+        await mailTransport.sendMail({
+            from: `"MTheme" ${GMAIL_USER}`,
+            to: req.body.email,
+            subject: `${code} is your verification code`,
+            html: htmlContent
+        });
+        res.status(status.CREATED).json({ message: 'Verification code sent successfully' });
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+    }
+})
 
 app.listen(port, () => {
     console.log(`Connected on port ${port}`);
