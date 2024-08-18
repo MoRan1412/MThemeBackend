@@ -23,4 +23,4 @@ jobs:
           username: ec2-user
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
-            pm2 reload all  # This command restarts your application
+            cd MThemeWeb/  # This command restarts your application
