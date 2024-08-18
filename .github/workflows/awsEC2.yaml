@@ -22,6 +22,7 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ec2-user
           key: ${{ secrets.PRIVATE_KEY }}
+          passphrase: Ccw1231520
           source: "./"  # This now correctly points to the current directory
           target: "/MThemeWeb/"
 
@@ -31,5 +32,6 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ec2-user
           key: ${{ secrets.PRIVATE_KEY }}
+          passphrase: Ccw1231520
           script: |
             pm2 reload all  # This command restarts your application
