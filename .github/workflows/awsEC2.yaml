@@ -23,4 +23,5 @@ jobs:
           username: ec2-user
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
-            cd MThemeWeb/  # This command restarts your application
+            cd MThemeWeb/MThemeBackend
+            git pull
