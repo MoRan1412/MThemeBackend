@@ -10,10 +10,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const tokenUsers = []
+const verificationCodes = {}
+const codeExpirationTime = 48 * 60 * 60 * 1000;
 
 import nodemailer from "nodemailer";
-const GMAIL_USER = "mtheme1231@gmail.com";
-const GMAIL_PASS = "ojzo rtkd shoa zbqb";
+const GMAIL_USER = process.env.GMAIL_USER;
+const GMAIL_PASS = process.env.GMAIL_PASS;
 const mailTransport = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -201,7 +203,7 @@ app.delete('/user/delete/:id', async (req, res) => {
     }
 });
 
-app.post('/user/sendEmail', async (req, res) => {
+app.post('/user/sendEmailVerifyCode', async (req, res) => {
     const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const charactersLength = characters.length;
     let code = '';
@@ -209,6 +211,14 @@ app.post('/user/sendEmail', async (req, res) => {
         const randomBytes = crypto.randomBytes(1);
         code += characters[randomBytes[0] % charactersLength];
     }
+    verificationCodes[req.body.email] = code
+
+    setTimeout(() => {
+        if (verificationCodes[req.body.email]) {
+            delete verificationCodes[req.body.email];
+            console.log(`Verification code for ${req.body.email} has expired and been deleted.`);
+        }
+    }, codeExpirationTime);
 
     let htmlContent = fs.readFileSync('emailContent.html', 'utf8');
     htmlContent = htmlContent.replace('{{code}}', code);
@@ -225,6 +235,17 @@ app.post('/user/sendEmail', async (req, res) => {
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
         console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+    }
+})
+
+app.post('/user/emailVerify', async (req, res) => {
+    if (verificationCodes[req.body.email] === req.body.code) {
+        res.status(status.CREATED).json({ message: 'Email verified successfully' });
+        delete verificationCodes[req.body.email];
+        console.log(`[OK] ${req.originalUrl}`);
+    } else {
+        res.status(status.NOT_FOUND).json({ error: 'Invalid verification code' });
+        console.log(`[ERR] ${req.originalUrl}`);
     }
 })
 
