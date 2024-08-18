@@ -24,7 +24,7 @@ const status = {
 const port = 10888;
 
 app.get('/', (req, res) => {
-    res.send('Hello!');
+    res.send('Hello World!');
 });
 
 app.get('/test', async (req, res) => {
