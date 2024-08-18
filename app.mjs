@@ -5,6 +5,8 @@ import { Octokit } from "@octokit/core";
 const octokit = new Octokit({
     auth: process.env.MThemeBackendEnv
 });
+const owner = 'MoRan1412';
+const repo = 'MThemeDatabase';
 
 const app = express();
 
@@ -30,8 +32,8 @@ app.get('/', (req, res) => {
 app.get('/test', async (req, res) => {
     try {
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-            owner: 'MoRan1412',
-            repo: 'MThemeDatabase',
+            owner: owner,
+            repo: repo,
             path: 'test.json',
             headers: {
               'X-GitHub-Api-Version': '2022-11-28'
@@ -47,12 +49,56 @@ app.get('/test', async (req, res) => {
     }
 });
 
+
+// User Management
+const userRepoPath = 'Theme/user.json';
+
+app.post('/user/create', async (req, res) => {
+    try {
+        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: userRepoPath,
+            message: 'Create user',
+            content: Buffer.from(JSON.stringify(req.body)).toString('base64'),
+            headers: {
+              'X-GitHub-Api-Version': '2022-11-28'
+            }
+          })
+        res.status(status.CREATED).json({ message: 'User created successfully' });
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+    }
+});
+
+app.put('/user/update', async (req, res) => {
+    try {
+        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: userRepoPath,
+            message: 'Update user',
+            content: Buffer.from(JSON.stringify(req.body)).toString('base64'),
+            headers: {
+              'X-GitHub-Api-Version': '2022-11-28'
+            }
+          })
+        res.status(status.CREATED).json({ message: 'User updated successfully' });
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+    }
+});
+
 app.get('/user/get', async (req, res) => {
     try {
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-            owner: 'MoRan1412',
-            repo: 'MThemeDatabase',
-            path: 'Theme/user.json',
+            owner: owner,
+            repo: repo,
+            path: userRepoPath,
             headers: {
               'X-GitHub-Api-Version': '2022-11-28'
             }
@@ -60,6 +106,25 @@ app.get('/user/get', async (req, res) => {
         const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
         const jsonData = JSON.parse(content);
         res.json(jsonData);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+    }
+});
+
+app.delete('/user/delete', async (req, res) => {
+    try {
+        const response = await octokit.request('DELETE /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: userRepoPath,
+            message: 'Delete user',
+            headers: {
+              'X-GitHub-Api-Version': '2022-11-28'
+            }
+          })
+        res.status(status.CREATED).json({ message: 'User deleted successfully' });
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
