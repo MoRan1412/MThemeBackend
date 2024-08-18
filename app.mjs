@@ -1,5 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
+import csprng from "csprng";
 import { Octokit } from "@octokit/core";
 
 const octokit = new Octokit({
@@ -29,42 +30,45 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-app.get('/test', async (req, res) => {
-    try {
-        const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-            owner: owner,
-            repo: repo,
-            path: 'test.json',
-            headers: {
-              'X-GitHub-Api-Version': '2022-11-28'
-            }
-          })
-        const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
-        const jsonData = JSON.parse(content);
-        res.json(jsonData);
-        console.log(`[OK] ${req.originalUrl}`);
-    } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
-        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
-    }
-});
-
 
 // User Management
 const userRepoPath = 'Theme/user.json';
 
 app.post('/user/create', async (req, res) => {
     try {
+        const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: userRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        const sha = existingFile.data.sha;
+
+        const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(currentContent);
+        const newUserData = {
+            id: csprng(130, 36),
+            username: req.body.username,
+            password: req.body.password,
+            email: req.body.email,
+            role: req.body.role
+        };
+
+        jsonData.push(newUserData);
+
         const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
             path: userRepoPath,
             message: 'Create user',
-            content: Buffer.from(JSON.stringify(req.body)).toString('base64'),
+            content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
+            sha: sha,
             headers: {
-              'X-GitHub-Api-Version': '2022-11-28'
+                'X-GitHub-Api-Version': '2022-11-28'
             }
-          })
+        })
         res.status(status.CREATED).json({ message: 'User created successfully' });
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
@@ -75,16 +79,46 @@ app.post('/user/create', async (req, res) => {
 
 app.put('/user/update', async (req, res) => {
     try {
+        const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: userRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        const sha = existingFile.data.sha;
+
+        const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(currentContent);
+        const newUserData = {
+            id: req.body.id,
+            username: req.body.username,
+            password: req.body.password,
+            email: req.body.email,
+            role: req.body.role
+        };
+
+        jsonData.forEach(user => {
+            if (user.id === newUserData.id) {
+                user.username = newUserData.username;
+                user.password = newUserData.password;
+                user.email = newUserData.email;
+                user.role = newUserData.role;
+            }
+        });
+
         const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
             path: userRepoPath,
             message: 'Update user',
-            content: Buffer.from(JSON.stringify(req.body)).toString('base64'),
+            content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
+            sha: sha,
             headers: {
-              'X-GitHub-Api-Version': '2022-11-28'
+                'X-GitHub-Api-Version': '2022-11-28'
             }
-          })
+        })
         res.status(status.CREATED).json({ message: 'User updated successfully' });
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
@@ -100,9 +134,9 @@ app.get('/user/get', async (req, res) => {
             repo: repo,
             path: userRepoPath,
             headers: {
-              'X-GitHub-Api-Version': '2022-11-28'
+                'X-GitHub-Api-Version': '2022-11-28'
             }
-          })
+        })
         const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
         const jsonData = JSON.parse(content);
         res.json(jsonData);
@@ -115,15 +149,36 @@ app.get('/user/get', async (req, res) => {
 
 app.delete('/user/delete', async (req, res) => {
     try {
-        const response = await octokit.request('DELETE /repos/{owner}/{repo}/contents/{path}', {
+        const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: userRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        const sha = existingFile.data.sha;
+
+        const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(currentContent);
+
+        jsonData.forEach((user, index) => {
+            if (user.id === req.body.id) {
+                jsonData.splice(index, 1);
+            }
+        });
+
+        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
             path: userRepoPath,
             message: 'Delete user',
+            content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
+            sha: sha,
             headers: {
-              'X-GitHub-Api-Version': '2022-11-28'
+                'X-GitHub-Api-Version': '2022-11-28'
             }
-          })
+        })
         res.status(status.CREATED).json({ message: 'User deleted successfully' });
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
