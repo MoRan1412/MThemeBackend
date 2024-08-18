@@ -43,7 +43,7 @@ app.get('/test', async (req, res) => {
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
-        console.error(`[ERR] ${req.originalUrl}`);
+        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
     }
 });
 
