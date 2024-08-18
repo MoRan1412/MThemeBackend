@@ -9,14 +9,18 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      MThemeAWSEC2: ${{ secrets.SSH_PRIVATE_KEY }}
+      EC2_IP: ${{ secrets.EC2_IP }}
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Setup SSH
       uses: webfactory/ssh-agent@v0.5.3
-      env:
-        MThemeAWSEC2: ${{ secrets.SSH_PRIVATE_KEY }}
+      with:
+        ssh-private-key: ${{ env.MThemeAWSEC2 }}
 
     - name: Deploy to EC2
-      run: ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_IP }} "echo 'Deployment successful'"
+      run: ssh -o StrictHostKeyChecking=no user@${{ env.EC2_IP }} "echo 'Deployment successful'"
