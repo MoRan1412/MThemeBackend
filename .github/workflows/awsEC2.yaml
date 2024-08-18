@@ -9,6 +9,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      HOST: ${{ secrets.HOST }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -23,7 +27,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "./"  # This now correctly points to the current directory
-          target: "/var/www/your_project_directory"
+          target: "/MThemeWeb/"
 
       - name: Restart PM2 application
         uses: appleboy/ssh-action@master
