@@ -26,12 +26,12 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 20.x
-      # 安装依赖
-      - name: npm install
-        run: npm install
-      # 打包
-      - name: npm build
-        run: npm run build
+    #   # 安装依赖
+    #   - name: npm install
+    #     run: npm install
+    #   # 打包
+    #   - name: npm build
+    #     run: npm run build
       # 部署到服务器
       - name: deploy
         uses: easingthemes/ssh-deploy@v2.1.1
@@ -48,7 +48,7 @@ jobs:
           REMOTE_USER: "ec2-user"
           # 目标目录
           TARGET: '/MThemeWeb/'
-          # 排除目录
-          EXCLUDE: "/node_modules/"
+        #   # 排除目录
+        #   EXCLUDE: "/node_modules/"
 
 
