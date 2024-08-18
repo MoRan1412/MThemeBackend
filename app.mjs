@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import csprng from "csprng";
 import crypto from "crypto";
 import fs from "fs";
+import path from "path";
 
 const app = express();
 
@@ -220,7 +221,8 @@ app.post('/user/sendEmailVerifyCode', async (req, res) => {
         }
     }, codeExpirationTime);
 
-    let htmlContent = fs.readFileSync('emailContent.html', 'utf8');
+    const filePath = path.join(__dirname, 'emailContent.html');
+    let htmlContent = fs.readFileSync(filePath, 'utf8');
     htmlContent = htmlContent.replace('{{code}}', code);
 
     try {
