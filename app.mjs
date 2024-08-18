@@ -34,7 +34,27 @@ app.get('/', (req, res) => {
 // User Management
 const userRepoPath = 'Theme/user.json';
 
-app.post('/user/create', async (req, res) => {
+app.get('/user/get', async (req, res) => {
+    try {
+        const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: userRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+        const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(content);
+        res.json(jsonData);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+    }
+});
+
+app.post('/user/add', async (req, res) => {
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -77,7 +97,7 @@ app.post('/user/create', async (req, res) => {
     }
 });
 
-app.put('/user/update', async (req, res) => {
+app.put('/user/update/:id', async (req, res) => {
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -92,7 +112,7 @@ app.put('/user/update', async (req, res) => {
         const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
         const jsonData = JSON.parse(currentContent);
         const newUserData = {
-            id: req.body.id,
+            id: req.params.id,
             username: req.body.username,
             password: req.body.password,
             email: req.body.email,
@@ -127,27 +147,7 @@ app.put('/user/update', async (req, res) => {
     }
 });
 
-app.get('/user/get', async (req, res) => {
-    try {
-        const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-            owner: owner,
-            repo: repo,
-            path: userRepoPath,
-            headers: {
-                'X-GitHub-Api-Version': '2022-11-28'
-            }
-        })
-        const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
-        const jsonData = JSON.parse(content);
-        res.json(jsonData);
-        console.log(`[OK] ${req.originalUrl}`);
-    } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
-        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
-    }
-});
-
-app.delete('/user/delete', async (req, res) => {
+app.delete('/user/delete/:id', async (req, res) => {
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -163,7 +163,7 @@ app.delete('/user/delete', async (req, res) => {
         const jsonData = JSON.parse(currentContent);
 
         jsonData.forEach((user, index) => {
-            if (user.id === req.body.id) {
+            if (user.id === req.params.id) {
                 jsonData.splice(index, 1);
             }
         });
