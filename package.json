@@ -13,7 +13,7 @@
   },
   "name": "api",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "app.mjs",
   "scripts": {
     "start": "nodemon app.mjs"
   },
