@@ -24,5 +24,7 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             cd MThemeWeb/MThemeBackend
-            git fetch origin
-            git pull --rebase
+            git add .
+            git commit -m "Update"
+            git pull
+            git push
