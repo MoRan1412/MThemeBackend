@@ -295,9 +295,9 @@ app.listen(port, () => {
 
 
 /* functions */
-function addTokenUser(user){
-    for(let i=0;i<tokenUsers.length;i++) {  
-        if(tokenUsers[i].id === user.id){
+function addTokenUser(user) {
+    for (let i = 0; i < tokenUsers.length; i++) {
+        if (tokenUsers[i].id === user.id) {
             tokenUsers[i].accessToken = user.accessToken
             console.log(tokenUsers)
             return
@@ -307,3 +307,7 @@ function addTokenUser(user){
     console.log(tokenUsers)
     return
 }
+
+const hashPassword = (passwd) => {
+    return crypto.createHash("sha256").update(passwd).digest("hex");
+};
