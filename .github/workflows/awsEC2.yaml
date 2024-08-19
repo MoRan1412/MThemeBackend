@@ -26,11 +26,3 @@ jobs:
             cd MThemeWeb/MThemeBackend
             git fetch origin
             git pull --rebase
-            if [ $? -ne 0 ]; then
-              git status
-              # Manually resolve merge conflicts
-              # git add <resolved_files>
-              # git rebase --continue
-              # git push
-              exit 1
-            fi
