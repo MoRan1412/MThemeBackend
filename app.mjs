@@ -263,13 +263,12 @@ app.get('/user/loginVerify', async (req, res) => {
                 'X-GitHub-Api-Version': '2022-11-28'
             }
         });
-        const sha = existingFile.data.sha;
 
         const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
         const jsonData = JSON.parse(currentContent);
 
-        let userData = {}
-        jsonData.forEach((user, index) => {
+        const userData = {}
+        jsonData.forEach((user) => {
             if (user.username === req.body.username && user.password === req.body.password) {
                 console.log(`[OK] Login successful: ${req.body.username}`);
                 userData.id = user.id
