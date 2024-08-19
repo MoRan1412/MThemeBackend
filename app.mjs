@@ -253,7 +253,7 @@ app.post('/user/emailVerify', async (req, res) => {
     }
 })
 
-app.get('/user/loginVerify', async (req, res) => {
+app.post('/user/loginVerify', async (req, res) => {
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
