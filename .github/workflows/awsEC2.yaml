@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Git Pull
+      - name: Git Pull with rebase
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.REMOTE_HOST }}
@@ -24,4 +24,5 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             cd MThemeWeb/MThemeBackend
-            git pull
+            git fetch origin
+            git pull --rebase
