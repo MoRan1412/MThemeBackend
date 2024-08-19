@@ -253,6 +253,58 @@ app.post('/user/emailVerify', async (req, res) => {
     }
 })
 
+app.get('/user/loginVerify', async (req, res) => {
+    try {
+        const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: userRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        const sha = existingFile.data.sha;
+
+        const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(currentContent);
+
+        let userData = {}
+        jsonData.forEach((user, index) => {
+            if (user.username === req.body.username && user.password === req.body.password) {
+                console.log(`[OK] Login successful: ${req.body.username}`);
+                userData.id = user.id
+                userData.username = user.username
+                userData.email = user.email
+                userData.role = user.role
+                const token = csprng(130, 36)
+                userData.accessToken = token
+                addTokenUser(userData)
+                res.status(status.OK).send(userData)
+            } else {
+                throw new Error("Incorrect username or password")
+            }
+        });
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+    }
+})
+
 app.listen(port, () => {
     console.log(`Connected on port ${port}`);
 });
+
+
+/* functions */
+function addTokenUser(user){
+    for(let i=0;i<tokenUsers.length;i++) {  
+        if(tokenUsers[i].id === user.id){
+            tokenUsers[i].accessToken = user.accessToken
+            console.log(tokenUsers)
+            return
+        }
+    }
+    tokenUsers.push(user)
+    console.log(tokenUsers)
+    return
+}
