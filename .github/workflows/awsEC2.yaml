@@ -24,4 +24,5 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             cd MThemeWeb/MThemeBackend
+            sudo su
             git pull
