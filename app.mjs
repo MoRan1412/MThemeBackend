@@ -44,6 +44,11 @@ const status = {
     INTERNAL_SERVER_ERROR: 500,
 };
 
+const statusData = {
+    code: status.OK,
+    message: ""
+}
+
 const port = 10888;
 
 app.get('/', (req, res) => {
@@ -75,6 +80,11 @@ app.get('/user/get', async (req, res) => {
 });
 
 app.post('/user/add', async (req, res) => {
+    // 參數
+    const username = req.body.username
+    const password = hashPassword(req.body.password)
+    const email = req.body.email
+
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -90,9 +100,9 @@ app.post('/user/add', async (req, res) => {
         const jsonData = JSON.parse(currentContent);
         const newUserData = {
             id: csprng(130, 36),
-            username: req.body.username,
-            password: hashPassword(req.body.password),
-            email: req.body.email,
+            username: username,
+            password: password,
+            email: email,
             role: "user"
         };
 
@@ -109,10 +119,15 @@ app.post('/user/add', async (req, res) => {
                 'X-GitHub-Api-Version': '2022-11-28'
             }
         })
-        res.status(status.CREATED).json({ message: 'User created successfully' });
+
+        statusData.code = status.CREATED
+        statusData.message = 'User created successfully'
+        res.status(status.CREATED).json(statusData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(status.INTERNAL_SERVER_ERROR).json(statusData);
         console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
     }
 });
@@ -208,6 +223,15 @@ app.delete('/user/delete/:id', async (req, res) => {
 });
 
 app.post('/user/sendEmailVerifyCode', async (req, res) => {
+    // 錯誤信息
+    const usernameExistString = 'Username already exists'
+    const emailExistString = 'Email already exists'
+    // 成功信息
+    const codeSendSuccess = 'Verification code sent successfully'
+    // 參數
+    const username = req.body.username
+    const email = req.body.email
+
     try {
         // 获取存在的用户数据库
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
@@ -223,13 +247,13 @@ app.post('/user/sendEmailVerifyCode', async (req, res) => {
         const jsonData = JSON.parse(currentContent);
 
         // 检查用户或邮箱是否存在
-        const emailExist = jsonData.find(user => user.email === req.body.email);
-        const userExist = jsonData.find(user => user.username === req.body.username);
+        const emailExist = jsonData.find(user => user.email === email);
+        const userExist = jsonData.find(user => user.username === username);
         if (emailExist) {
-            throw new Error('Email already exists');
+            throw new Error(emailExistString);
         }
         if (userExist) {
-            throw new Error('Username already exists');
+            throw new Error(usernameExistString);
         }
 
         // 邮箱验证码生成
@@ -242,14 +266,14 @@ app.post('/user/sendEmailVerifyCode', async (req, res) => {
         }
 
         // 将验证码储存到对象
-        verificationCodes[req.body.email] = code
+        verificationCodes[email] = code
 
         // 到指定时间删除验证码
         setTimeout(() => {
             try {
-                if (verificationCodes[req.body.email]) {
-                    delete verificationCodes[req.body.email];
-                    console.log(`Verification code for ${req.body.email} has expired and been deleted.`);
+                if (verificationCodes[email]) {
+                    delete verificationCodes[email];
+                    console.log(`Verification code for ${email} has expired and been deleted.`);
                 }
             } catch (error) {
                 console.error(`Error while deleting expired verification code: ${error}`);
@@ -261,43 +285,66 @@ app.post('/user/sendEmailVerifyCode', async (req, res) => {
         const filePath = path.join(__dirname, 'emailContent.html');
         let htmlContent = fs.readFileSync(filePath, 'utf8');
         htmlContent = htmlContent.replace('{{code}}', code);
-        htmlContent = htmlContent.replace('{{username}}', req.body.username);
+        htmlContent = htmlContent.replace('{{username}}', username);
 
         try {
             // 发送邮箱
             await mailTransport.sendMail({
                 from: `"MTheme" ${GMAIL_USER}`,
-                to: req.body.email,
+                to: email,
                 subject: `${code} is your verification code`,
                 html: htmlContent
             });
 
-            res.status(status.OK).json({ message: 'Verification code sent successfully' });
-            console.log(`[OK] ${req.originalUrl}`);
+            statusData.code = status.OK
+            statusData.message = codeSendSuccess
+            res.status(status.OK).json(statusData);
+            console.log(`[OK] ${req.originalUrl} \n${codeSendSuccess}`);
         } catch (error) {
-            res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            statusData.message = error.message
+            res.status(status.INTERNAL_SERVER_ERROR).json(statusData);
             console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
         }
 
     } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        statusData.message = error.message
+        if (error.message == usernameExistString || error.message == emailExistString) {
+            statusData.code = status.CONFLICT
+            res.status(status.CONFLICT).json(statusData);
+        } else {
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            res.status(status.INTERNAL_SERVER_ERROR).json(statusData);
+        }
         console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
-        return;
     }
 })
 
 app.post('/user/emailVerify', async (req, res) => {
-    if (verificationCodes[req.body.email] === req.body.code) {
-        res.status(status.OK).json({ message: 'Email verified successfully' });
-        delete verificationCodes[req.body.email];
-        console.log(`[OK] ${req.originalUrl}`);
+    // 參數
+    const email = req.body.email
+    const code = req.body.code
+    if (verificationCodes[email] === code) {
+        statusData.code = status.OK
+        statusData.message = 'Email verified successfully'
+        res.status(status.OK).json(statusData);
+        delete verificationCodes[email];
+        console.log(`[OK] ${req.originalUrl} \n${statusData.message}`);
     } else {
-        res.status(status.UNAUTHORIZED).json({ error: 'Invalid verification code' });
-        console.log(`[ERR] ${req.originalUrl}`);
+        statusData.code = status.UNAUTHORIZED
+        statusData.message = 'Invalid verification code'
+        res.status(status.UNAUTHORIZED).json(statusData);
+        console.log(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 })
 
 app.post('/user/loginVerify', async (req, res) => {
+    // 參數
+    const username = req.body.username
+    const password = req.body.password
+    // 錯誤信息
+    const invalidInput = 'Invalid username or password'
+
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -313,8 +360,8 @@ app.post('/user/loginVerify', async (req, res) => {
 
         let userFound = false;
         jsonData.forEach((user, index) => {
-            if (user.username === req.body.username && user.password === hashPassword(req.body.password)) {
-                console.log(`[OK] Login successful: ${req.body.username}`);
+            if (user.username === username && user.password === hashPassword(password)) {
+                console.log(`[OK] Login successful: ${username}`);
                 const userData = {
                     id: user.id,
                     username: user.username,
@@ -328,11 +375,15 @@ app.post('/user/loginVerify', async (req, res) => {
             }
         });
         if (!userFound) {
-            console.log(`[ERR] ${req.originalUrl} \nInvalid username or password`);
-            return res.status(status.UNAUTHORIZED).json({ error: 'Invalid username or password' });
+            statusData.code = status.UNAUTHORIZED
+            statusData.message = invalidInput
+            console.log(`[ERR] ${req.originalUrl} \n${invalidInput}`);
+            res.status(status.UNAUTHORIZED).json(statusData);
         }
     } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(status.INTERNAL_SERVER_ERROR).json(statusData);
         console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
     }
 })
