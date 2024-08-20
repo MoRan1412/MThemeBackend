@@ -214,11 +214,15 @@ app.delete('/user/delete/:id', async (req, res) => {
                 'X-GitHub-Api-Version': '2022-11-28'
             }
         })
-        res.status(status.OK).json({ message: 'User deleted successfully' });
+        statusData.code = status.OK
+        statusData.message = 'User deleted successfully'
+        res.status(statusData.code).json(statusData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
-        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 });
 
