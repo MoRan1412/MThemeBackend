@@ -103,6 +103,7 @@ app.post('/user/add', async (req, res) => {
             username: username,
             password: password,
             email: email,
+            language: "en",
             role: "user"
         };
 
@@ -151,6 +152,7 @@ app.put('/user/update/:id', async (req, res) => {
             username: req.body.username,
             password: req.body.password,
             email: req.body.email,
+            language: req.body.language,
             role: req.body.role
         };
 
