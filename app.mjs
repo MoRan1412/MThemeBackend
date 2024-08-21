@@ -2,7 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import csprng from "csprng";
 import crypto from "crypto";
-import fs from "fs";
+import fs, { stat } from "fs";
 import { fileURLToPath } from 'url';
 import path from "path";
 
@@ -58,7 +58,7 @@ app.get('/', (req, res) => {
 
 // Database Path
 const userRepoPath = 'Theme/user.json';
-const themeRepoPath = 'Theme/theme.json';
+const klwpRepoPath = 'Theme/klwp.json';
 
 // User Management
 
@@ -77,8 +77,10 @@ app.get('/user/get', async (req, res) => {
         res.status(status.OK).json(jsonData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
-        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 });
 
@@ -126,13 +128,13 @@ app.post('/user/add', async (req, res) => {
 
         statusData.code = status.CREATED
         statusData.message = 'User created successfully'
-        res.status(status.CREATED).json(statusData);
+        res.status(statusData.code).json(statusData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
         statusData.code = status.INTERNAL_SERVER_ERROR
         statusData.message = error.message
-        res.status(status.INTERNAL_SERVER_ERROR).json(statusData);
-        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 });
 
@@ -179,11 +181,15 @@ app.put('/user/update/:id', async (req, res) => {
                 'X-GitHub-Api-Version': '2022-11-28'
             }
         })
-        res.status(status.OK).json({ message: 'User updated successfully' });
+        statusData.code = status.OK
+        statusData.message = 'User updated successfully'
+        res.status(statusData.code).json(statusData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
-        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 });
 
@@ -307,25 +313,25 @@ app.post('/user/sendEmailVerifyCode', async (req, res) => {
 
             statusData.code = status.OK
             statusData.message = codeSendSuccess
-            res.status(status.OK).json(statusData);
-            console.log(`[OK] ${req.originalUrl} \n${codeSendSuccess}`);
+            res.status(statusData.code).json(statusData);
+            console.log(`[OK] ${req.originalUrl} \n${statusData.message}`);
         } catch (error) {
             statusData.code = status.INTERNAL_SERVER_ERROR
             statusData.message = error.message
-            res.status(status.INTERNAL_SERVER_ERROR).json(statusData);
-            console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+            res.status(statusData.code).json(statusData);
+            console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
         }
 
     } catch (error) {
         statusData.message = error.message
-        if (error.message == usernameExistString || error.message == emailExistString) {
+        if (statusData.message == usernameExistString || statusData.message == emailExistString) {
             statusData.code = status.CONFLICT
-            res.status(status.CONFLICT).json(statusData);
+            res.status(statusData.code).json(statusData);
         } else {
             statusData.code = status.INTERNAL_SERVER_ERROR
-            res.status(status.INTERNAL_SERVER_ERROR).json(statusData);
+            res.status(statusData.code).json(statusData);
         }
-        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 })
 
@@ -342,7 +348,7 @@ app.post('/user/emailVerify', async (req, res) => {
     } else {
         statusData.code = status.UNAUTHORIZED
         statusData.message = 'Invalid verification code'
-        res.status(status.UNAUTHORIZED).json(statusData);
+        res.status(statusData.code).json(statusData);
         console.log(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 })
@@ -386,24 +392,24 @@ app.post('/user/loginVerify', async (req, res) => {
         if (!userFound) {
             statusData.code = status.UNAUTHORIZED
             statusData.message = invalidInput
-            console.log(`[ERR] ${req.originalUrl} \n${invalidInput}`);
-            res.status(status.UNAUTHORIZED).json(statusData);
+            console.log(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+            res.status(statusData.code).json(statusData);
         }
     } catch (error) {
         statusData.code = status.INTERNAL_SERVER_ERROR
         statusData.message = error.message
-        res.status(status.INTERNAL_SERVER_ERROR).json(statusData);
-        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 })
 
 // Theme Management
-app.get('/theme/get', async (req, res) => {
+app.get('/klwp/get', async (req, res) => {
     try {
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
-            path: themeRepoPath,
+            path: klwpRepoPath,
             headers: {
                 'X-GitHub-Api-Version': '2022-11-28'
             }
@@ -413,8 +419,10 @@ app.get('/theme/get', async (req, res) => {
         res.status(status.OK).json(jsonData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).json({ error: error.message });
-        console.error(`[ERR] ${req.originalUrl} \n${error.message}`);
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 });
 
