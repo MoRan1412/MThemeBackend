@@ -61,7 +61,6 @@ const userRepoPath = 'Theme/user.json';
 const klwpRepoPath = 'Theme/klwp.json';
 
 // User Management
-
 app.get('/user/get', async (req, res) => {
     try {
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
@@ -403,7 +402,7 @@ app.post('/user/loginVerify', async (req, res) => {
     }
 })
 
-// Theme Management
+// KLWP Management
 app.get('/klwp/get', async (req, res) => {
     try {
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
@@ -417,6 +416,195 @@ app.get('/klwp/get', async (req, res) => {
         const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
         const jsonData = JSON.parse(content);
         res.status(status.OK).json(jsonData);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+    }
+});
+
+app.get('/klwp/get/:id', async (req, res) => {
+    try {
+        const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: klwpRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+        const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(content);
+        let klwpData
+        jsonData.forEach((klwp) => {
+            if (klwp.id === req.params.id) {
+                klwpData = klwp
+            }
+        });
+        res.status(status.OK).json(klwpData);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+    }
+});
+
+app.post('/klwp/add', async (req, res) => {
+    // 參數
+    const klwpname = req.body.name
+    const author = req.body.author
+    const desc = req.body.desc
+    const link = req.body.link
+    const image = req.body.image
+
+    try {
+        const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: klwpRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        const sha = existingFile.data.sha;
+
+        const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(currentContent);
+        const newKLWPData = {
+            id: csprng(130, 36),
+            name: klwpname,
+            author: author,
+            desc: desc,
+            link: link,
+            image: image
+        };
+
+        jsonData.push(newKLWPData);
+
+        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: klwpRepoPath,
+            message: 'Create klwp',
+            content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
+            sha: sha,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+
+        statusData.code = status.CREATED
+        statusData.message = 'KLWP created successfully'
+        res.status(statusData.code).json(statusData);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+    }
+});
+
+app.put('/klwp/update/:id', async (req, res) => {
+    const klwpname = req.body.name
+    const author = req.body.author
+    const desc = req.body.desc
+    const link = req.body.link
+    const image = req.body.image
+    try {
+        const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: klwpRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        const sha = existingFile.data.sha;
+
+        const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(currentContent);
+        const newKLWPData = {
+            id: req.params.id,
+            name: klwpname,
+            author: author,
+            desc: desc,
+            link: link,
+            image: image
+        };
+
+        jsonData.forEach(klwp => {
+            if (klwp.id === newKLWPData.id) {
+                klwp.name = newKLWPData.name;
+                klwp.author = newKLWPData.author;
+                klwp.desc = newKLWPData.desc;
+                klwp.link = newKLWPData.link;
+                klwp.image = newKLWPData.image;
+            }
+        });
+
+        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: klwpRepoPath,
+            message: 'Update klwp',
+            content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
+            sha: sha,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+        statusData.code = status.OK
+        statusData.message = 'KLWP updated successfully'
+        res.status(statusData.code).json(statusData);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+    }
+});
+
+app.delete('/klwp/delete/:id', async (req, res) => {
+    try {
+        const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: klwpRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        const sha = existingFile.data.sha;
+
+        const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(currentContent);
+
+        jsonData.forEach((klwp, index) => {
+            if (klwp.id === req.params.id) {
+                jsonData.splice(index, 1);
+            }
+        });
+
+        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: klwpRepoPath,
+            message: 'Delete klwp',
+            content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
+            sha: sha,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+        statusData.code = status.OK
+        statusData.message = 'KLWP deleted successfully'
+        res.status(statusData.code).json(statusData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
         statusData.code = status.INTERNAL_SERVER_ERROR
