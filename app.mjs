@@ -460,6 +460,7 @@ app.post('/klwp/add', async (req, res) => {
     const desc = req.body.desc
     const link = req.body.link
     const image = req.body.image
+    const price = req.body.price
 
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
@@ -480,7 +481,8 @@ app.post('/klwp/add', async (req, res) => {
             author: author,
             desc: desc,
             link: link,
-            image: image
+            image: image,
+            price: price
         };
 
         jsonData.push(newKLWPData);
@@ -515,6 +517,7 @@ app.put('/klwp/update/:id', async (req, res) => {
     const desc = req.body.desc
     const link = req.body.link
     const image = req.body.image
+    const price = req.body.price
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -534,7 +537,8 @@ app.put('/klwp/update/:id', async (req, res) => {
             author: author,
             desc: desc,
             link: link,
-            image: image
+            image: image,
+            price: price
         };
 
         jsonData.forEach(klwp => {
