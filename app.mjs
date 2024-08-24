@@ -58,7 +58,7 @@ app.get('/', (req, res) => {
 
 // Database Path
 const userRepoPath = 'Theme/user.json';
-const klwpRepoPath = 'Theme/klwp.json';
+const productRepoPath = 'Theme/product.json';
 
 // User Management
 app.get('/user/get', async (req, res) => {
@@ -403,12 +403,12 @@ app.post('/user/loginVerify', async (req, res) => {
 })
 
 // KLWP Management
-app.get('/klwp/get', async (req, res) => {
+app.get('/product/get', async (req, res) => {
     try {
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
-            path: klwpRepoPath,
+            path: productRepoPath,
             headers: {
                 'X-GitHub-Api-Version': '2022-11-28'
             }
@@ -425,12 +425,12 @@ app.get('/klwp/get', async (req, res) => {
     }
 });
 
-app.get('/klwp/get/:id', async (req, res) => {
+app.get('/product/get/:id', async (req, res) => {
     try {
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
-            path: klwpRepoPath,
+            path: productRepoPath,
             headers: {
                 'X-GitHub-Api-Version': '2022-11-28'
             }
@@ -453,7 +453,7 @@ app.get('/klwp/get/:id', async (req, res) => {
     }
 });
 
-app.post('/klwp/add', async (req, res) => {
+app.post('/product/add', async (req, res) => {
     // 參數
     const klwpname = req.body.name
     const author = req.body.author
@@ -461,12 +461,14 @@ app.post('/klwp/add', async (req, res) => {
     const link = req.body.link
     const image = req.body.image
     const price = req.body.price
+    const requirement = req.body.requirement
+    const type = req.body.type
 
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
-            path: klwpRepoPath,
+            path: productRepoPath,
             headers: {
                 'X-GitHub-Api-Version': '2022-11-28'
             }
@@ -482,7 +484,9 @@ app.post('/klwp/add', async (req, res) => {
             desc: desc,
             link: link,
             image: image,
-            price: price
+            price: price,
+            requirement: requirement,
+            type: type
         };
 
         jsonData.push(newKLWPData);
@@ -490,7 +494,7 @@ app.post('/klwp/add', async (req, res) => {
         const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
-            path: klwpRepoPath,
+            path: productRepoPath,
             message: 'Create klwp',
             content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
             sha: sha,
@@ -511,18 +515,20 @@ app.post('/klwp/add', async (req, res) => {
     }
 });
 
-app.put('/klwp/update/:id', async (req, res) => {
+app.put('/product/update/:id', async (req, res) => {
     const klwpname = req.body.name
     const author = req.body.author
     const desc = req.body.desc
     const link = req.body.link
     const image = req.body.image
     const price = req.body.price
+    const requirement = req.body.requirement
+    const type = req.body.type
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
-            path: klwpRepoPath,
+            path: productRepoPath,
             headers: {
                 'X-GitHub-Api-Version': '2022-11-28'
             }
@@ -538,23 +544,21 @@ app.put('/klwp/update/:id', async (req, res) => {
             desc: desc,
             link: link,
             image: image,
-            price: price
+            price: price,
+            requirement: requirement,
+            type: type
         };
 
         jsonData.forEach(klwp => {
             if (klwp.id === newKLWPData.id) {
-                klwp.name = newKLWPData.name;
-                klwp.author = newKLWPData.author;
-                klwp.desc = newKLWPData.desc;
-                klwp.link = newKLWPData.link;
-                klwp.image = newKLWPData.image;
+                klwp = newKLWPData
             }
         });
 
         const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
-            path: klwpRepoPath,
+            path: productRepoPath,
             message: 'Update klwp',
             content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
             sha: sha,
@@ -574,12 +578,12 @@ app.put('/klwp/update/:id', async (req, res) => {
     }
 });
 
-app.delete('/klwp/delete/:id', async (req, res) => {
+app.delete('/product/delete/:id', async (req, res) => {
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
-            path: klwpRepoPath,
+            path: productRepoPath,
             headers: {
                 'X-GitHub-Api-Version': '2022-11-28'
             }
@@ -598,7 +602,7 @@ app.delete('/klwp/delete/:id', async (req, res) => {
         const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
-            path: klwpRepoPath,
+            path: productRepoPath,
             message: 'Delete klwp',
             content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
             sha: sha,
