@@ -59,6 +59,7 @@ app.get('/', (req, res) => {
 // Database Path
 const userRepoPath = 'Theme/user.json';
 const productRepoPath = 'Theme/product.json';
+const commentRepoPath = 'Theme/comment.json';
 
 // User Management
 app.get('/user/get', async (req, res) => {
@@ -402,7 +403,7 @@ app.post('/user/loginVerify', async (req, res) => {
     }
 })
 
-// KLWP Management
+// Product Management
 app.get('/product/get', async (req, res) => {
     try {
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
@@ -437,13 +438,13 @@ app.get('/product/get/:id', async (req, res) => {
         })
         const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
         const jsonData = JSON.parse(content);
-        let klwpData
-        jsonData.forEach((klwp) => {
-            if (klwp.id === req.params.id) {
-                klwpData = klwp
+        let productData
+        jsonData.forEach((product) => {
+            if (product.id === req.params.id) {
+                productData = product
             }
         });
-        res.status(status.OK).json(klwpData);
+        res.status(status.OK).json(productData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
         statusData.code = status.INTERNAL_SERVER_ERROR
@@ -618,6 +619,29 @@ app.delete('/product/delete/:id', async (req, res) => {
         statusData.code = status.OK
         statusData.message = 'KLWP deleted successfully'
         res.status(statusData.code).json(statusData);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+    }
+});
+
+// Comment Management
+app.get('/comment/get', async (req, res) => {
+    try {
+        const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: commentRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+        const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(content);
+        res.status(status.OK).json(jsonData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
         statusData.code = status.INTERNAL_SERVER_ERROR
