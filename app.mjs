@@ -427,6 +427,8 @@ app.get('/product/get', async (req, res) => {
 });
 
 app.get('/product/get/:id', async (req, res) => {
+    const productId = req.params.id;
+    console.log(productId);
     try {
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -440,7 +442,7 @@ app.get('/product/get/:id', async (req, res) => {
         const jsonData = JSON.parse(content);
         let productData
         jsonData.forEach((product) => {
-            if (product.id === req.params.id) {
+            if (product.id === productId) {
                 productData = product
             }
         });
