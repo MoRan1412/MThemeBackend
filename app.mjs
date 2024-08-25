@@ -89,6 +89,8 @@ app.post('/user/add', async (req, res) => {
     const username = req.body.username
     const password = hashPassword(req.body.password)
     const email = req.body.email
+    const createdAt = formatDateTime(new Date())
+    const updatedAt = formatDateTime(new Date())
 
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
@@ -109,7 +111,9 @@ app.post('/user/add', async (req, res) => {
             password: password,
             email: email,
             language: "en",
-            role: "user"
+            role: "user",
+            createdAt: createdAt,
+            updatedAt: updatedAt
         };
 
         jsonData.push(newUserData);
@@ -139,6 +143,14 @@ app.post('/user/add', async (req, res) => {
 });
 
 app.put('/user/update/:id', async (req, res) => {
+    const userId = req.params.id
+    const username = req.body.username
+    const password = req.body.password
+    const email = req.body.email
+    const language = req.body.language
+    const role = req.body.role
+    const updatedAt = formatDateTime(new Date())
+    const notFoundUser = `User with ID ${userId} not found`
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -152,23 +164,22 @@ app.put('/user/update/:id', async (req, res) => {
 
         const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
         const jsonData = JSON.parse(currentContent);
-        const newUserData = {
-            id: req.params.id,
-            username: req.body.username,
-            password: req.body.password,
-            email: req.body.email,
-            language: req.body.language,
-            role: req.body.role
-        };
 
+        let foundUser = false
         jsonData.forEach(user => {
-            if (user.id === newUserData.id) {
-                user.username = newUserData.username;
-                user.password = newUserData.password;
-                user.email = newUserData.email;
-                user.role = newUserData.role;
+            if (user.id === userId) {
+                user.username = username;
+                user.password = password;
+                user.email = email;
+                user.language = language;
+                user.role = role;
+                user.updatedAt = updatedAt;
+                foundUser = true;
             }
         });
+        if (!foundUser) {
+            throw new Error(notFoundUser)
+        }
 
         const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -186,14 +197,21 @@ app.put('/user/update/:id', async (req, res) => {
         res.status(statusData.code).json(statusData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
-        statusData.code = status.INTERNAL_SERVER_ERROR
-        statusData.message = error.message
+        if (error.message === notFoundUser) {
+            statusData.code = status.NOT_FOUND
+            statusData.message = notFoundUser
+        } else {
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            statusData.message = error.message
+        }
         res.status(statusData.code).json(statusData);
         console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 });
 
 app.delete('/user/delete/:id', async (req, res) => {
+    const userId = req.params.id
+    const notFoundUser = `User with ID ${userId} not found`
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -208,11 +226,16 @@ app.delete('/user/delete/:id', async (req, res) => {
         const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
         const jsonData = JSON.parse(currentContent);
 
+        let foundUser = false
         jsonData.forEach((user, index) => {
             if (user.id === req.params.id) {
                 jsonData.splice(index, 1);
+                foundUser = true;
             }
         });
+        if (!foundUser) {
+            throw new Error(notFoundUser)
+        }
 
         const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -230,8 +253,13 @@ app.delete('/user/delete/:id', async (req, res) => {
         res.status(statusData.code).json(statusData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
-        statusData.code = status.INTERNAL_SERVER_ERROR
-        statusData.message = error.message
+        if (error.message === notFoundUser) {
+            statusData.code = status.NOT_FOUND
+            statusData.message = notFoundUser
+        } else {
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            statusData.message = error.message
+        }
         res.status(statusData.code).json(statusData);
         console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
@@ -427,8 +455,11 @@ app.get('/product/get', async (req, res) => {
 });
 
 app.get('/product/get/:id', async (req, res) => {
+    // 
     const productId = req.params.id;
-    console.log(productId);
+    // 
+    const notFoundProduct = `Product with ID ${productId} not found`
+
     try {
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -441,16 +472,26 @@ app.get('/product/get/:id', async (req, res) => {
         const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
         const jsonData = JSON.parse(content);
         let productData
+        let foundProduct = false;
         jsonData.forEach((product) => {
             if (product.id === productId) {
-                productData = product
+                productData = product;
+                foundProduct = true;
             }
         });
+        if (!foundProduct) {
+            throw new Error(notFoundProduct);
+        }
         res.status(status.OK).json(productData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
-        statusData.code = status.INTERNAL_SERVER_ERROR
-        statusData.message = error.message
+        if (error.message === notFoundProduct) {
+            statusData.code = status.NOT_FOUND
+            statusData.message = notFoundProduct
+        } else {
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            statusData.message = error.message
+        }
         res.status(statusData.code).json(statusData);
         console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
@@ -458,7 +499,7 @@ app.get('/product/get/:id', async (req, res) => {
 
 app.post('/product/add', async (req, res) => {
     // 參數
-    const klwpname = req.body.name
+    const productName = req.body.name
     const author = req.body.author
     const desc = req.body.desc
     const link = req.body.link
@@ -483,7 +524,7 @@ app.post('/product/add', async (req, res) => {
         const jsonData = JSON.parse(currentContent);
         const newKLWPData = {
             id: csprng(130, 36),
-            name: klwpname,
+            name: productName,
             author: author,
             desc: desc,
             link: link,
@@ -521,7 +562,9 @@ app.post('/product/add', async (req, res) => {
 });
 
 app.put('/product/update/:id', async (req, res) => {
-    const klwpname = req.body.name
+
+    const productId = req.params.id
+    const productName = req.body.name
     const author = req.body.author
     const desc = req.body.desc
     const link = req.body.link
@@ -531,6 +574,8 @@ app.put('/product/update/:id', async (req, res) => {
     const type = req.body.type
     const article = req.body.article
 
+    const notFoundProduct = `Product with ID ${productId} not found`
+
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -544,38 +589,31 @@ app.put('/product/update/:id', async (req, res) => {
 
         const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
         const jsonData = JSON.parse(currentContent);
-        const newKLWPData = {
-            id: req.params.id,
-            name: klwpname,
-            author: author,
-            desc: desc,
-            link: link,
-            image: image,
-            price: price,
-            requirement: requirement,
-            type: type,
-            article: article
-        };
 
-        jsonData.forEach(klwp => {
-            if (klwp.id === newKLWPData.id) {
-                klwp.name = newKLWPData.name;
-                klwp.author = newKLWPData.author;
-                klwp.desc = newKLWPData.desc;
-                klwp.link = newKLWPData.link;
-                klwp.image = newKLWPData.image;
-                klwp.price = newKLWPData.price;
-                klwp.requirement = newKLWPData.requirement;
-                klwp.type = newKLWPData.type;
-                klwp.article = newKLWPData.article;
+        let productFound = false;
+        jsonData.forEach(product => {
+            if (product.id === productId) {
+                product.name = productName;
+                product.author = author;
+                product.desc = desc;
+                product.link = link;
+                product.image = image;
+                product.price = price;
+                product.requirement = requirement;
+                product.type = type;
+                product.article = article;
+                productFound = true;
             }
         });
+        if (!productFound) {
+            throw new Error(notFoundProduct);
+        }
 
         const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
             path: productRepoPath,
-            message: 'Update klwp',
+            message: 'Update product',
             content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
             sha: sha,
             headers: {
@@ -583,18 +621,25 @@ app.put('/product/update/:id', async (req, res) => {
             }
         })
         statusData.code = status.OK
-        statusData.message = 'KLWP updated successfully'
+        statusData.message = 'Product updated successfully'
         res.status(statusData.code).json(statusData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
-        statusData.code = status.INTERNAL_SERVER_ERROR
-        statusData.message = error.message
+        if (error.message === notFoundProduct) {
+            statusData.code = status.NOT_FOUND
+            statusData.message = notFoundProduct
+        } else {
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            statusData.message = error.message
+        }
         res.status(statusData.code).json(statusData);
         console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 });
 
 app.delete('/product/delete/:id', async (req, res) => {
+    const productId = req.params.id;
+    const notFoundProduct = `Product with ID ${productId} not found`
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -609,17 +654,22 @@ app.delete('/product/delete/:id', async (req, res) => {
         const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
         const jsonData = JSON.parse(currentContent);
 
-        jsonData.forEach((klwp, index) => {
-            if (klwp.id === req.params.id) {
+        let productFound = false;
+        jsonData.forEach((product, index) => {
+            if (product.id === productId) {
                 jsonData.splice(index, 1);
+                productFound = true;
             }
         });
+        if (!productFound) {
+            throw new Error(notFoundProduct);
+        }
 
         const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
             repo: repo,
             path: productRepoPath,
-            message: 'Delete klwp',
+            message: 'Delete product',
             content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
             sha: sha,
             headers: {
@@ -631,14 +681,25 @@ app.delete('/product/delete/:id', async (req, res) => {
         res.status(statusData.code).json(statusData);
         console.log(`[OK] ${req.originalUrl}`);
     } catch (error) {
-        statusData.code = status.INTERNAL_SERVER_ERROR
-        statusData.message = error.message
+        if (error.message === notFoundProduct) {
+            statusData.code = status.NOT_FOUND
+            statusData.message = notFoundProduct
+        } else {
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            statusData.message = error.message
+        }
         res.status(statusData.code).json(statusData);
         console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 });
 
 // Comment Management
+const commentStatus = {
+    pending: 'pending',
+    approved: 'approved',
+    rejected: 'rejected'
+}
+
 app.get('/comment/get', async (req, res) => {
     try {
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
@@ -660,6 +721,195 @@ app.get('/comment/get', async (req, res) => {
         console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
     }
 });
+
+app.post('/comment/add', async (req, res) => {
+    const productId = req.body.productId
+    const userId = req.body.userId
+    const username = req.body.username
+    const avatar = req.body.avatar
+    const content = req.body.content
+    const createdAt = formatDateTime(new Date())
+    const updatedAt = formatDateTime(new Date())
+    const commentStatus = req.body.status
+
+    try {
+        const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: commentRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        const sha = existingFile.data.sha;
+
+        const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(currentContent);
+
+        const newComment = {
+            id: csprng(130, 36),
+            productId: productId,
+            userId: userId,
+            username: username,
+            avatar: avatar,
+            content: content,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            status: commentStatus
+        };
+
+        jsonData.push(newComment);
+
+        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: commentRepoPath,
+            message: 'Create comment',
+            content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
+            sha: sha,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+
+        statusData.code = status.CREATED
+        statusData.message = 'Comment created successfully'
+        res.status(statusData.code).json(statusData);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+    }
+});
+
+app.put('/comment/update/:id', async (req, res) => {
+    const commentId = req.params.id
+    const userId = req.body.userId
+    const username = req.body.username
+    const avatar = req.body.avatar
+    const productId = req.body.productId
+    const updatedAt = formatDateTime(new Date())
+    const content = req.body.content
+    const commentStatus = req.body.status
+
+    const notFoundComment = `Comment with ID ${commentId} not found`
+
+    try {
+        const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: commentRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        const sha = existingFile.data.sha;
+
+        const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(currentContent);
+
+        let commentFound = false;
+        jsonData.forEach(comment => {
+            if (comment.id === commentId) {
+                comment.content = content;
+                comment.productId = productId;
+                comment.userId = userId;
+                comment.username = username;
+                comment.avatar = avatar;
+                comment.updatedAt = updatedAt;
+                comment.status = commentStatus;
+                commentFound = true;
+            }
+        });
+        if (!commentFound) {
+            throw new Error(notFoundComment);
+        }
+
+        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: commentRepoPath,
+            message: 'Update comment',
+            content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
+            sha: sha,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+        statusData.code = status.OK
+        statusData.message = 'Comment updated successfully'
+        res.status(statusData.code).json(statusData);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        if (error.message === notFoundComment) {
+            statusData.code = status.NOT_FOUND
+            statusData.message = notFoundComment
+        } else {
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            statusData.message = error.message
+        }
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+    }
+});
+
+app.delete('/comment/delete/:id', async (req, res) => {
+    const commentId = req.params.id;
+    const notFoundComment = `Comment with ID ${commentId} not found`
+    try {
+        const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: commentRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        const sha = existingFile.data.sha;
+
+        const currentContent = Buffer.from(existingFile.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(currentContent);
+
+        let commentFound = false;
+        jsonData.forEach((comment, index) => {
+            if (comment.id === commentId) {
+                jsonData.splice(index, 1);
+                commentFound = true;
+            }
+        });
+        if (!commentFound) {
+            throw new Error(notFoundComment);
+        }
+
+        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: commentRepoPath,
+            message: 'Delete comment',
+            content: Buffer.from(JSON.stringify(jsonData)).toString('base64'),
+            sha: sha,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+        statusData.code = status.OK
+        statusData.message = 'Comment deleted successfully'
+        res.status(statusData.code).json(statusData);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        if (error.message === notFoundComment) {
+            statusData.code = status.NOT_FOUND
+            statusData.message = notFoundComment
+        } else {
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            statusData.message = error.message
+        }
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+    }
+})
 
 app.listen(port, () => {
     console.log(`Connected on port ${port}`);
@@ -683,3 +933,13 @@ function addTokenUser(user) {
 const hashPassword = (passwd) => {
     return crypto.createHash("sha256").update(passwd).digest("hex");
 };
+
+function formatDateTime(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
