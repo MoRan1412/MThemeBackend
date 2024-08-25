@@ -559,7 +559,15 @@ app.put('/product/update/:id', async (req, res) => {
 
         jsonData.forEach(klwp => {
             if (klwp.id === newKLWPData.id) {
-                klwp = newKLWPData
+                klwp.name = newKLWPData.name;
+                klwp.author = newKLWPData.author;
+                klwp.desc = newKLWPData.desc;
+                klwp.link = newKLWPData.link;
+                klwp.image = newKLWPData.image;
+                klwp.price = newKLWPData.price;
+                klwp.requirement = newKLWPData.requirement;
+                klwp.type = newKLWPData.type;
+                klwp.article = newKLWPData.article;
             }
         });
 
