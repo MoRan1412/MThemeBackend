@@ -84,6 +84,29 @@ app.get('/user/get', async (req, res) => {
     }
 });
 
+app.get('/user/get/:id', async (req, res) => {
+    try {
+        const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: userRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+        const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(content);
+        const user = jsonData.find(user => user.id === req.params.id);
+        res.status(status.OK).json(user);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        statusData.code = status.INTERNAL_SERVER_ERROR
+        statusData.message = error.message
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+    }
+});
+
 app.post('/user/add', async (req, res) => {
     // 參數
     const username = req.body.username
