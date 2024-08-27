@@ -88,6 +88,7 @@ app.post('/user/add', async (req, res) => {
     // 參數
     const username = req.body.username
     const password = hashPassword(req.body.password)
+    const avatar = "../source/image/avatar/default.png"
     const email = req.body.email
     const createdAt = formatDateTime(new Date())
     const updatedAt = formatDateTime(new Date())
@@ -109,6 +110,7 @@ app.post('/user/add', async (req, res) => {
             id: csprng(130, 36),
             username: username,
             password: password,
+            avatar: avatar,
             email: email,
             language: "en",
             role: "user",
@@ -146,6 +148,7 @@ app.put('/user/update/:id', async (req, res) => {
     const userId = req.params.id
     const username = req.body.username
     const password = req.body.password
+    const avatar = req.body.avatar
     const email = req.body.email
     const language = req.body.language
     const role = req.body.role
@@ -170,6 +173,7 @@ app.put('/user/update/:id', async (req, res) => {
             if (user.id === userId) {
                 user.username = username;
                 user.password = password;
+                user.avatar = avatar;
                 user.email = email;
                 user.language = language;
                 user.role = role;
@@ -408,6 +412,7 @@ app.post('/user/loginVerify', async (req, res) => {
                 const userData = {
                     id: user.id,
                     username: user.username,
+                    avatar: user.avatar,
                     email: user.email,
                     role: user.role,
                     accessToken: csprng(130, 36)
