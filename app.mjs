@@ -459,6 +459,73 @@ app.post('/user/loginVerify', async (req, res) => {
     }
 })
 
+app.post('/user/passwordVerifyCode', async (req, res) => {
+    // 成功信息
+    const codeSendSuccess = 'Verification code sent successfully'
+    // 參數
+    const username = req.body.username
+    const email = req.body.email
+
+    try {
+        // 邮箱验证码生成
+        const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const charactersLength = characters.length;
+        let code = '';
+        for (let i = 0; i < 5; i++) {
+            const randomBytes = crypto.randomBytes(1);
+            code += characters[randomBytes[0] % charactersLength];
+        }
+
+        // 将验证码储存到对象
+        verificationCodes[email] = code
+
+        // 到指定时间删除验证码
+        setTimeout(() => {
+            try {
+                if (verificationCodes[email]) {
+                    delete verificationCodes[email];
+                    console.log(`Verification code for ${email} has expired and been deleted.`);
+                }
+            } catch (error) {
+                console.error(`Error while deleting expired verification code: ${error}`);
+            }
+        }, codeExpirationTime);
+
+        // 获取邮箱样式HTML文件
+        const __dirname = path.dirname(fileURLToPath(import.meta.url));
+        const filePath = path.join(__dirname, 'emailContent.html');
+        let htmlContent = fs.readFileSync(filePath, 'utf8');
+        htmlContent = htmlContent.replace('{{code}}', code);
+        htmlContent = htmlContent.replace('{{username}}', username);
+
+        try {
+            // 发送邮箱
+            await mailTransport.sendMail({
+                from: `"MTheme" ${GMAIL_USER}`,
+                to: email,
+                subject: `${code} is your verification code`,
+                html: htmlContent
+            });
+
+            statusData.code = status.OK
+            statusData.message = codeSendSuccess
+            res.status(statusData.code).json(statusData);
+            console.log(`[OK] ${req.originalUrl} \n${statusData.message}`);
+        } catch (error) {
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            statusData.message = error.message
+            res.status(statusData.code).json(statusData);
+            console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+        }
+
+    } catch (error) {
+        statusData.message = error.message
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+    }
+})
+
 // Product Management
 app.get('/product/get', async (req, res) => {
     try {
