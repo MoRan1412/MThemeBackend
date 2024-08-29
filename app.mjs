@@ -170,7 +170,7 @@ app.post('/user/add', async (req, res) => {
 app.put('/user/update/:id', async (req, res) => {
     const userId = req.params.id
     const username = req.body.username
-    const password = req.body.password
+    const password = hashPassword(req.body.password)
     const avatar = req.body.avatar
     const email = req.body.email
     const language = req.body.language
@@ -438,6 +438,7 @@ app.post('/user/loginVerify', async (req, res) => {
                     avatar: user.avatar,
                     email: user.email,
                     role: user.role,
+                    language: user.language,
                     accessToken: csprng(130, 36)
                 };
                 addTokenUser(userData);
