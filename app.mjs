@@ -37,6 +37,7 @@ const repo = 'MThemeDatabase';
 const status = {
     OK: 200,
     CREATED: 201,
+    BAD_REQUEST: 400,
     UNAUTHORIZED: 401,
     FORBIDDEN: 403,
     NOT_FOUND: 404,
@@ -169,14 +170,27 @@ app.post('/user/add', async (req, res) => {
 
 app.put('/user/update/:id', async (req, res) => {
     const userId = req.params.id
-    const username = req.body.username
-    const password = hashPassword(req.body.password)
-    const avatar = req.body.avatar
-    const email = req.body.email
-    const language = req.body.language
-    const role = req.body.role
     const updatedAt = formatDateTime(new Date())
     const notFoundUser = `User with ID ${userId} not found`
+    const badRequestMsg = `No fields to update`
+
+    const fieldsToUpdate = ['username', 'password', 'avatar', 'email', 'language', 'role']; 
+
+    const updates = {};
+    fieldsToUpdate.forEach(field => {
+        if (req.body[field]) {
+            if (field === 'password') {
+                updates[field] = hashPassword(req.body[field]);
+            } else {
+                updates[field] = req.body[field];
+            }
+        }
+    });
+
+    if (Object.keys(updates).length === 0) {
+        throw new Error(badRequestMsg)
+    }
+
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: owner,
@@ -194,16 +208,16 @@ app.put('/user/update/:id', async (req, res) => {
         let foundUser = false
         jsonData.forEach(user => {
             if (user.id === userId) {
-                user.username = username;
-                user.password = password;
-                user.avatar = avatar;
-                user.email = email;
-                user.language = language;
-                user.role = role;
+                fieldsToUpdate.forEach(field => {
+                    if (updates[field]) {
+                        user[field] = updates[field];
+                    }
+                });
                 user.updatedAt = updatedAt;
                 foundUser = true;
             }
         });
+
         if (!foundUser) {
             throw new Error(notFoundUser)
         }
@@ -227,6 +241,9 @@ app.put('/user/update/:id', async (req, res) => {
         if (error.message === notFoundUser) {
             statusData.code = status.NOT_FOUND
             statusData.message = notFoundUser
+        } else if (error.message === badRequestMsg) {
+            statusData.code = status.BAD_REQUEST
+            statusData.message = badRequestMsg
         } else {
             statusData.code = status.INTERNAL_SERVER_ERROR
             statusData.message = error.message
@@ -658,19 +675,22 @@ app.post('/product/add', async (req, res) => {
 });
 
 app.put('/product/update/:id', async (req, res) => {
+    const notFoundProduct = `Product with ID ${productId} not found`
+    const badRequestMsg = `No fields to update`
 
     const productId = req.params.id
-    const productName = req.body.name
-    const author = req.body.author
-    const desc = req.body.desc
-    const link = req.body.link
-    const image = req.body.image
-    const price = req.body.price
-    const requirement = req.body.requirement
-    const type = req.body.type
-    const article = req.body.article
+    const fieldsToUpdate = ['name', 'author', 'desc', 'link', 'image', 'price','requirement','type','article']; 
 
-    const notFoundProduct = `Product with ID ${productId} not found`
+    const updates = {};
+    fieldsToUpdate.forEach(field => {
+        if (req.body[field]) {
+            updates[field] = req.body[field];
+        }
+    });
+
+    if (Object.keys(updates).length === 0) {
+        throw new Error(badRequestMsg)
+    }
 
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
@@ -689,18 +709,14 @@ app.put('/product/update/:id', async (req, res) => {
         let productFound = false;
         jsonData.forEach(product => {
             if (product.id === productId) {
-                product.name = productName;
-                product.author = author;
-                product.desc = desc;
-                product.link = link;
-                product.image = image;
-                product.price = price;
-                product.requirement = requirement;
-                product.type = type;
-                product.article = article;
-                productFound = true;
+                fieldsToUpdate.forEach(field => {
+                    if (updates[field]) {
+                        product[field] = updates[field];
+                    }
+                });
             }
         });
+
         if (!productFound) {
             throw new Error(notFoundProduct);
         }
@@ -724,6 +740,9 @@ app.put('/product/update/:id', async (req, res) => {
         if (error.message === notFoundProduct) {
             statusData.code = status.NOT_FOUND
             statusData.message = notFoundProduct
+        } else if (error.message === badRequestMsg) {
+            statusData.code = status.BAD_REQUEST
+            statusData.message = badRequestMsg
         } else {
             statusData.code = status.INTERNAL_SERVER_ERROR
             statusData.message = error.message
@@ -881,6 +900,9 @@ app.post('/comment/add', async (req, res) => {
 });
 
 app.put('/comment/update/:id', async (req, res) => {
+    const notFoundComment = `Comment with ID ${commentId} not found`
+    const badRequestMsg = `No fields to update`
+    
     const commentId = req.params.id
     const userId = req.body.userId
     const username = req.body.username
@@ -889,8 +911,6 @@ app.put('/comment/update/:id', async (req, res) => {
     const updatedAt = formatDateTime(new Date())
     const content = req.body.content
     const commentStatus = req.body.status
-
-    const notFoundComment = `Comment with ID ${commentId} not found`
 
     try {
         const existingFile = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
