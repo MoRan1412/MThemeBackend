@@ -837,6 +837,47 @@ app.get('/comment/get', async (req, res) => {
     }
 });
 
+app.get("/comment/get/:id", async (req, res) => {
+    const commentId = req.params.id
+    const notFoundComment = `Comment with ID ${commentId} not found`
+
+    try {
+        const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: owner,
+            repo: repo,
+            path: commentRepoPath,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+        const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(content);
+        let commentData
+        let foundComment = false;
+        jsonData.forEach((comment) => {
+            if (comment.id === commentId) {
+                commentData = comment;
+                foundComment = true;
+            }
+        });
+        if (!foundComment) {
+            throw new Error(notFoundComment);
+        }
+        res.status(status.OK).json(commentData);
+        console.log(`[OK] ${req.originalUrl}`);
+    } catch (error) {
+        if (error.message === notFoundComment) {
+            statusData.code = status.NOT_FOUND
+            statusData.message = notFoundComment
+        } else {
+            statusData.code = status.INTERNAL_SERVER_ERROR
+            statusData.message = error.message
+        }
+        res.status(statusData.code).json(statusData);
+        console.error(`[ERR] ${req.originalUrl} \n${statusData.message}`);
+    }
+})
+
 app.post('/comment/add', async (req, res) => {
     const productId = req.body.productId
     const userId = req.body.userId
